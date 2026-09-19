@@ -1194,7 +1194,24 @@
     </div>
   </div>
 
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js"></script>
   <script>
+    // Firebase Configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCGPhLoA2WeyISk0KdDvDI22dI3vj11WlY",
+      authDomain: "family-hub-6905f.firebaseapp.com",
+      projectId: "family-hub-6905f",
+      storageBucket: "family-hub-6905f.firebasestorage.app",
+      messagingSenderId: "103082121429",
+      appId: "1:103082121429:web:f8f573b365c21628cfaa5c",
+      databaseURL: "https://family-hub-6905f.firebaseio.com"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+
     const users = {
       ian: { name: 'Ian', role: 'admin' },
       cindy: { name: 'Cindy', role: 'admin' },
@@ -1306,10 +1323,9 @@
     }
 
     function loadData() {
-      const stored = localStorage.getItem('familyDashboardV4');
-      if (stored) {
-        try {
-          const data = JSON.parse(stored);
+      database.ref('familyHub').once('value', (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
           tasks = data.tasks || [];
           shopSpending = data.shopSpending || {};
           earnedWBPerUser = data.earnedWBPerUser || {};
@@ -1340,11 +1356,15 @@
             });
             saveData(); // Save corrected data
           }
-        } catch (e) {
-          console.error('Failed to load:', e);
+        } else {
+          // Initialize with empty data structure if nothing exists
+          Object.keys(users).forEach(userId => {
+            shopSpending[userId] = 0;
+            earnedWBPerUser[userId] = 0;
+          });
         }
-      }
-      renderAll();
+        renderAll();
+      });
     }
 
     function saveData() {
@@ -1353,9 +1373,12 @@
         shopSpending: shopSpending,
         earnedWBPerUser: earnedWBPerUser,
         purchaseHistory: purchaseHistory,
-        claimedItems: claimedItems
+        claimedItems: claimedItems,
+        lastUpdated: new Date().toISOString()
       };
-      localStorage.setItem('familyDashboardV4', JSON.stringify(data));
+      database.ref('familyHub').set(data).catch(error => {
+        console.error('Failed to save data:', error);
+      });
     }
 
     function clearAllData() {
@@ -1370,9 +1393,13 @@
           shopSpending[userId] = 0;
           earnedWBPerUser[userId] = 0;
         });
-        localStorage.removeItem('familyDashboardV4');
-        renderAll();
-        showTaskSuccess('✓ All data cleared!');
+        database.ref('familyHub').remove().then(() => {
+          renderAll();
+          showTaskSuccess('✓ All data cleared!');
+        }).catch(error => {
+          console.error('Failed to clear data:', error);
+          showTaskError('Failed to clear data');
+        });
       }
     }
 
