@@ -1324,9 +1324,9 @@
     }
 
     function loadData() {
-      database.ref('familyHub').once('value', (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
+      database.ref('familyHub').on('value', (snapshot) => {
+        if (snapshot.exists()) {
+          const data = snapshot.val();
           tasks = data.tasks || [];
           shopSpending = data.shopSpending || {};
           earnedWBPerUser = data.earnedWBPerUser || {};
@@ -1365,6 +1365,8 @@
           });
         }
         renderAll();
+      }, (error) => {
+        console.error('Firebase read error:', error);
       });
     }
 
