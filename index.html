@@ -826,10 +826,104 @@
         width: 95%;
       }
     }
+
+    /* Login Modal Styles */
+    .login-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, var(--accent) 0%, #4f46e5 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    .login-container {
+      background: var(--bg-primary);
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+    }
+
+    .login-container h2 {
+      font-family: "Playfair Display", serif;
+      font-size: 32px;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .login-container p {
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+      font-size: 14px;
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 16px;
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      box-sizing: border-box;
+    }
+
+    .login-container input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-light);
+    }
+
+    .login-container button {
+      width: 100%;
+      padding: 12px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .login-container button:hover {
+      background: #16a34a;
+    }
+
+    .login-error {
+      color: var(--red);
+      font-size: 12px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    .login-error.show {
+      display: block;
+    }
   </style>
 </head>
 <body>
-  <div class="app">
+  <!-- Login Modal -->
+  <div id="loginModal" class="login-modal">
+    <div class="login-container">
+      <h2>Family Hub</h2>
+      <p>Enter password to access</p>
+      <input type="password" id="passwordInput" placeholder="Password" autocomplete="off">
+      <button onclick="authenticatePassword()">Enter</button>
+      <p id="loginError" class="login-error"></p>
+    </div>
+  </div>
+
+  <div class="app" id="appContainer" style="display: none;">
     <div class="top-bar">
       <h1>📋 Family Hub</h1>
       <div class="user-selector">
@@ -846,6 +940,7 @@
           <span class="user-badge" style="color: #10b981;"></span>Angus
         </button>
         <button onclick="clearAllData()" style="padding: 8px 12px; border-radius: 6px; border: 2px solid transparent; background: #fecaca; color: #dc2626; cursor: pointer; font-weight: 500; font-size: 13px; transition: all 0.2s;">🗑️ Clear All</button>
+        <button onclick="logout()" style="padding: 8px 12px; border-radius: 6px; border: 2px solid transparent; background: var(--bg-tertiary); color: var(--text-secondary); cursor: pointer; font-weight: 500; font-size: 13px; transition: all 0.2s;">🔒 Logout</button>
       </div>
     </div>
 
@@ -1206,7 +1301,7 @@
       storageBucket: "family-hub-6905f.firebasestorage.app",
       messagingSenderId: "103082121429",
       appId: "1:103082121429:web:f8f573b365c21628cfaa5c",
-      databaseURL: "https://family-hub-6905f.firebaseio.com"
+      databaseURL: "https://family-hub-6905f-default-rtdb.europe-west1.firebasedatabase.app"
     };
 
     // Initialize Firebase
@@ -2539,12 +2634,68 @@
       document.querySelector('[data-section="all-tasks"]').style.display = 'none';
     }
 
+    // Authentication functions
+    const APP_PASSWORD = 'family123'; // Change this to your desired password
+    const AUTH_TOKEN_KEY = 'familyHubAuth';
+
+    function authenticatePassword() {
+      const passwordInput = document.getElementById('passwordInput');
+      const password = passwordInput.value;
+      const errorMsg = document.getElementById('loginError');
+
+      if (password === APP_PASSWORD) {
+        // Store auth token in localStorage
+        localStorage.setItem(AUTH_TOKEN_KEY, 'authenticated');
+        errorMsg.classList.remove('show');
+        showApp();
+      } else {
+        errorMsg.textContent = 'Incorrect password. Try again.';
+        errorMsg.classList.add('show');
+        passwordInput.value = '';
+        passwordInput.focus();
+      }
+    }
+
+    function checkAuthentication() {
+      const isAuthenticated = localStorage.getItem(AUTH_TOKEN_KEY) === 'authenticated';
+      if (isAuthenticated) {
+        showApp();
+      } else {
+        document.getElementById('passwordInput').focus();
+      }
+    }
+
+    function showApp() {
+      document.getElementById('loginModal').style.display = 'none';
+      document.getElementById('appContainer').style.display = 'flex';
+      loadData();
+      updateUserHeaders();
+      renderAll();
+    }
+
+    function logout() {
+      localStorage.removeItem(AUTH_TOKEN_KEY);
+      document.getElementById('loginModal').style.display = 'flex';
+      document.getElementById('appContainer').style.display = 'none';
+      document.getElementById('passwordInput').value = '';
+      document.getElementById('loginError').classList.remove('show');
+      document.getElementById('passwordInput').focus();
+    }
+
+    // Allow Enter key to submit password
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('passwordInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          authenticatePassword();
+        }
+      });
+    });
+
     // Initialize form - show task fields, hide event fields
     toggleItemType('task');
 
-    loadData();
-    updateUserHeaders();
-    renderAll();
+    // Check authentication on app load
+    checkAuthentication();
   </script>
 </body>
 </html>
