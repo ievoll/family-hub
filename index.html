@@ -1469,6 +1469,7 @@
             earnedWBPerUser[userId] = 0;
           });
         }
+        console.log('[Firebase] Data updated. Tasks count:', tasks.length);
         renderAll();
       }, (error) => {
         console.error('Firebase read error:', error);
@@ -1594,7 +1595,11 @@
     function canSeeTask(task) {
       if (isAdmin()) return true;
       const assignees = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo];
-      return assignees.includes(currentUser);
+      const canSee = assignees.includes(currentUser);
+      if (!canSee) {
+        console.log(`[canSeeTask] Task "${task.title}" not assigned to ${currentUser}. Assigned to:`, assignees);
+      }
+      return canSee;
     }
 
     function getNextDate(date, recur) {
@@ -1612,12 +1617,14 @@
       // Returns all dates where this task should appear in the calendar
       // If task is completed, don't show any recurring dates for it
       if (task.completed && task.recurPattern !== 'once' && task.recurPattern) {
+        console.log(`[getRecurringDates] Task "${task.title}" is completed, returning []`);
         return [];
       }
 
       if (task.recurPattern === 'once' || !task.recurPattern) {
         // Return just the date part (before the space if there's a time component)
         const dateOnly = task.dueDate.split(' ')[0];
+        console.log(`[getRecurringDates] Task "${task.title}" (once/none) returns [${dateOnly}]`);
         return [dateOnly];
       }
 
@@ -1657,6 +1664,7 @@
         currentDate = getNextDate(currentDate, task.recurPattern);
       }
 
+      console.log(`[getRecurringDates] Task "${task.title}" (${task.recurPattern}) returns [${dates.join(', ')}]`);
       return dates;
     }
 
@@ -1763,6 +1771,7 @@
       }
 
       tasks.push(newTask);
+      console.log(`[addTask] Created task "${newTask.title}" assigned to:`, newTask.assignedTo, 'due:', newTask.dueDate);
 
       // Clear form
       document.getElementById('task-title').value = '';
@@ -2080,6 +2089,7 @@
 
 
     function renderCalendar() {
+      console.log('[renderCalendar] called. Filters:', { person: calendarFilters.person, status: calendarFilters.status, categories: Array.from(calendarFilters.categories), totalTasks: tasks.length });
       renderCalendarCategoryFilters();
 
       const year = currentDate.getFullYear();
@@ -2600,6 +2610,7 @@
     }
 
     function renderAll() {
+      console.log('[renderAll] Starting with', tasks.length, 'tasks');
       renderCalendar();
       renderMyTasks();
       renderAllTasks();
