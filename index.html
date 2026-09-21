@@ -909,6 +909,13 @@
     .login-error.show {
       display: block;
     }
+
+    .loading-message {
+      color: var(--text-secondary);
+      font-size: 13px;
+      text-align: center;
+      margin-top: 12px;
+    }
   </style>
 </head>
 <body>
@@ -916,10 +923,12 @@
   <div id="loginModal" class="login-modal">
     <div class="login-container">
       <h2>Family Hub</h2>
-      <p>Enter password to access</p>
-      <input type="password" id="passwordInput" placeholder="Password" autocomplete="off">
-      <button onclick="authenticatePassword()">Enter</button>
+      <p>Sign in with your email</p>
+      <input type="email" id="emailInput" placeholder="Email address" autocomplete="email">
+      <input type="password" id="passwordInput" placeholder="Password" autocomplete="current-password">
+      <button onclick="authenticateWithFirebase()">Sign In</button>
       <p id="loginError" class="login-error"></p>
+      <p id="loadingMessage" class="loading-message" style="display: none;">Signing in...</p>
     </div>
   </div>
 
@@ -2634,35 +2643,52 @@
       document.querySelector('[data-section="all-tasks"]').style.display = 'none';
     }
 
-    // Authentication functions
-    const APP_PASSWORD = 'family123'; // Change this to your desired password
-    const AUTH_TOKEN_KEY = 'familyHubAuth';
-
-    function authenticatePassword() {
-      const passwordInput = document.getElementById('passwordInput');
-      const password = passwordInput.value;
+    // Firebase Authentication functions
+    function authenticateWithFirebase() {
+      const email = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('passwordInput').value;
       const errorMsg = document.getElementById('loginError');
+      const loadingMsg = document.getElementById('loadingMessage');
 
-      if (password === APP_PASSWORD) {
-        // Store auth token in localStorage
-        localStorage.setItem(AUTH_TOKEN_KEY, 'authenticated');
-        errorMsg.classList.remove('show');
-        showApp();
-      } else {
-        errorMsg.textContent = 'Incorrect password. Try again.';
+      if (!email || !password) {
+        errorMsg.textContent = 'Please enter both email and password.';
         errorMsg.classList.add('show');
-        passwordInput.value = '';
-        passwordInput.focus();
+        return;
       }
+
+      loadingMsg.style.display = 'block';
+      errorMsg.classList.remove('show');
+
+      firebase.auth().signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+          loadingMsg.style.display = 'none';
+          showApp();
+        })
+        .catch((error) => {
+          loadingMsg.style.display = 'none';
+          errorMsg.classList.add('show');
+          if (error.code === 'auth/user-not-found') {
+            errorMsg.textContent = 'Email not found.';
+          } else if (error.code === 'auth/wrong-password') {
+            errorMsg.textContent = 'Incorrect password.';
+          } else if (error.code === 'auth/invalid-email') {
+            errorMsg.textContent = 'Invalid email address.';
+          } else {
+            errorMsg.textContent = error.message;
+          }
+          document.getElementById('passwordInput').value = '';
+          document.getElementById('passwordInput').focus();
+        });
     }
 
     function checkAuthentication() {
-      const isAuthenticated = localStorage.getItem(AUTH_TOKEN_KEY) === 'authenticated';
-      if (isAuthenticated) {
-        showApp();
-      } else {
-        document.getElementById('passwordInput').focus();
-      }
+      firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+          showApp();
+        } else {
+          document.getElementById('emailInput').focus();
+        }
+      });
     }
 
     function showApp() {
@@ -2674,19 +2700,28 @@
     }
 
     function logout() {
-      localStorage.removeItem(AUTH_TOKEN_KEY);
-      document.getElementById('loginModal').style.display = 'flex';
-      document.getElementById('appContainer').style.display = 'none';
-      document.getElementById('passwordInput').value = '';
-      document.getElementById('loginError').classList.remove('show');
-      document.getElementById('passwordInput').focus();
+      firebase.auth().signOut().then(() => {
+        document.getElementById('loginModal').style.display = 'flex';
+        document.getElementById('appContainer').style.display = 'none';
+        document.getElementById('emailInput').value = '';
+        document.getElementById('passwordInput').value = '';
+        document.getElementById('loginError').classList.remove('show');
+        document.getElementById('emailInput').focus();
+      }).catch((error) => {
+        console.error('Logout error:', error);
+      });
     }
 
-    // Allow Enter key to submit password
+    // Allow Enter key to submit login
     document.addEventListener('DOMContentLoaded', function() {
       document.getElementById('passwordInput').addEventListener('keypress', function(e) {
         if (e.key === 'Enter') {
-          authenticatePassword();
+          authenticateWithFirebase();
+        }
+      });
+      document.getElementById('emailInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+          document.getElementById('passwordInput').focus();
         }
       });
     });
