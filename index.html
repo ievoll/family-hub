@@ -1325,6 +1325,14 @@
       angus: { name: 'Angus', role: 'member' }
     };
 
+    // Map email addresses to user IDs
+    const emailToUser = {
+      'ian.vollrath@gmail.com': 'ian',
+      'cindy.koewandhono@gmail.com': 'cindy',
+      'ivy.vollrath@gmail.com': 'ivy',
+      'angus.vollrath@gmail.com': 'angus'
+    };
+
     const categories = {
       chores: '🏠 Chores',
       homework: '✏️ Homework',
@@ -1564,15 +1572,17 @@
 
       document.getElementById('calendar-header').textContent = `${userName}'s Calendar`;
 
-      // Hide Person and Categories filters for kids (Ivy and Angus)
-      const isKid = currentUser === 'ivy' || currentUser === 'angus';
-      document.getElementById('calendar-person-filter').style.display = isKid ? 'none' : 'block';
-      document.getElementById('calendar-categories-filter').style.display = isKid ? 'none' : 'block';
-      document.getElementById('calendar-show-all-filter').style.display = isKid ? 'none' : 'block';
+      // Hide filters for non-admins (Ivy and Angus can only see their own tasks)
+      const isAdmin = users[currentUser].role === 'admin';
+      document.getElementById('calendar-person-filter').style.display = isAdmin ? 'block' : 'none';
+      document.getElementById('calendar-categories-filter').style.display = isAdmin ? 'block' : 'none';
+      document.getElementById('calendar-show-all-filter').style.display = isAdmin ? 'block' : 'none';
 
-      // Set calendar person filter to current user for Ian and Cindy
-      if (!isKid) {
-        setCalendarPersonFilter();
+      // For admins, default to showing all. For non-admins, lock to their own tasks
+      if (isAdmin) {
+        calendarFilters.person = 'all';
+      } else {
+        calendarFilters.person = currentUser;
       }
     }
 
@@ -1583,6 +1593,7 @@
 
       const isAdmin = users[userId].role === 'admin';
       document.querySelector('[data-section="all-tasks"]').style.display = isAdmin ? 'block' : 'none';
+      document.querySelector('#create-task').style.display = isAdmin ? 'block' : 'none';
 
       updateUserHeaders();
       renderAll();
@@ -1919,6 +1930,11 @@
     }
 
     function updateCalendarFilter(filterType, value, btn) {
+      // Non-admins can't change their person filter
+      if (filterType === 'person' && !isAdmin()) {
+        return;
+      }
+
       if (filterType === 'person') {
         calendarFilters.person = value;
         btn.parentElement.querySelectorAll('[data-filter="person"]').forEach(b => b.classList.remove('active'));
@@ -1938,6 +1954,11 @@
     }
 
     function toggleCalendarShowAll() {
+      // Non-admins can't toggle show all
+      if (!isAdmin()) {
+        document.getElementById('calendar-show-all-tasks').checked = false;
+        return;
+      }
       calendarShowAll = document.getElementById('calendar-show-all-tasks').checked;
       renderCalendar();
     }
@@ -2666,6 +2687,8 @@
       firebase.auth().signInWithEmailAndPassword(email, password)
         .then((userCredential) => {
           loadingMsg.style.display = 'none';
+          // Map email to user ID
+          currentUser = emailToUser[email.toLowerCase()] || 'ian';
           showApp();
         })
         .catch((error) => {
@@ -2688,6 +2711,8 @@
     function checkAuthentication() {
       firebase.auth().onAuthStateChanged((user) => {
         if (user) {
+          // Map email to user ID
+          currentUser = emailToUser[user.email.toLowerCase()] || 'ian';
           showApp();
         } else {
           document.getElementById('emailInput').focus();
@@ -2698,6 +2723,12 @@
     function showApp() {
       document.getElementById('loginModal').style.display = 'none';
       document.getElementById('appContainer').style.display = 'flex';
+
+      // Hide admin-only sections for non-admins
+      const isAdminUser = users[currentUser].role === 'admin';
+      document.querySelector('[data-section="all-tasks"]').style.display = isAdminUser ? 'block' : 'none';
+      document.querySelector('#create-task').style.display = isAdminUser ? 'block' : 'none';
+
       loadData();
       updateUserHeaders();
       renderAll();
