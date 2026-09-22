@@ -936,23 +936,10 @@
     <div class="top-bar">
       <h1>📋 Family Hub</h1>
       <div class="user-selector">
-        <div style="font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; padding: 0 12px; border-right: 1px solid var(--border);">
+        <div style="font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; padding: 0 12px;">
           <span>Logged in as:</span>
           <strong id="logged-in-user" style="color: var(--accent);">—</strong>
         </div>
-        <button class="user-btn active ian" data-user="ian" onclick="switchUser('ian')">
-          <span class="user-badge" style="color: #3b82f6;"></span>Ian
-        </button>
-        <button class="user-btn cindy" data-user="cindy" onclick="switchUser('cindy')">
-          <span class="user-badge" style="color: #f43f5e;"></span>Cindy
-        </button>
-        <button class="user-btn ivy" data-user="ivy" onclick="switchUser('ivy')">
-          <span class="user-badge" style="color: #a855f7;"></span>Ivy
-        </button>
-        <button class="user-btn angus" data-user="angus" onclick="switchUser('angus')">
-          <span class="user-badge" style="color: #10b981;"></span>Angus
-        </button>
-        <button onclick="clearAllData()" style="padding: 8px 12px; border-radius: 6px; border: 2px solid transparent; background: #fecaca; color: #dc2626; cursor: pointer; font-weight: 500; font-size: 13px; transition: all 0.2s;">🗑️ Clear All</button>
         <button onclick="logout()" style="padding: 8px 12px; border-radius: 6px; border: 2px solid transparent; background: var(--bg-tertiary); color: var(--text-secondary); cursor: pointer; font-weight: 500; font-size: 13px; transition: all 0.2s;">🔒 Logout</button>
       </div>
     </div>
@@ -2737,14 +2724,10 @@
       const userName = users[currentUser].name;
       document.getElementById('logged-in-user').textContent = userName;
 
-      // Hide admin-only sections and nav items for non-admins
+      // Hide admin-only nav items for non-admins
       const isAdminUser = users[currentUser].role === 'admin';
-      // Hide from sidebar
       document.querySelector('[data-section="all-tasks"]').style.display = isAdminUser ? 'block' : 'none';
       document.querySelector('[data-section="create-task"]').style.display = isAdminUser ? 'block' : 'none';
-      // Hide sections
-      document.querySelector('#all-tasks').style.display = isAdminUser ? 'flex' : 'none';
-      document.querySelector('#create-task').style.display = isAdminUser ? 'block' : 'none';
 
       // Hide user buttons for non-admins (Ivy and Angus)
       document.querySelectorAll('.user-btn').forEach(btn => {
