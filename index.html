@@ -936,6 +936,10 @@
     <div class="top-bar">
       <h1>📋 Family Hub</h1>
       <div class="user-selector">
+        <div style="font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; padding: 0 12px; border-right: 1px solid var(--border);">
+          <span>Logged in as:</span>
+          <strong id="logged-in-user" style="color: var(--accent);">—</strong>
+        </div>
         <button class="user-btn active ian" data-user="ian" onclick="switchUser('ian')">
           <span class="user-badge" style="color: #3b82f6;"></span>Ian
         </button>
@@ -1587,6 +1591,11 @@
     }
 
     function switchUser(userId) {
+      // Only admins can switch users
+      if (!isAdmin()) {
+        return;
+      }
+
       currentUser = userId;
       document.querySelectorAll('.user-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelector(`[data-user="${userId}"]`).classList.add('active');
@@ -2724,10 +2733,33 @@
       document.getElementById('loginModal').style.display = 'none';
       document.getElementById('appContainer').style.display = 'flex';
 
+      // Display logged-in user
+      const userName = users[currentUser].name;
+      document.getElementById('logged-in-user').textContent = userName;
+
       // Hide admin-only sections for non-admins
       const isAdminUser = users[currentUser].role === 'admin';
       document.querySelector('[data-section="all-tasks"]').style.display = isAdminUser ? 'block' : 'none';
       document.querySelector('#create-task').style.display = isAdminUser ? 'block' : 'none';
+
+      // Hide user buttons for non-admins (Ivy and Angus)
+      document.querySelectorAll('.user-btn').forEach(btn => {
+        btn.style.display = isAdminUser ? 'block' : 'none';
+      });
+      // But show their own button grayed out so they see who they are
+      const ownButton = document.querySelector(`[data-user="${currentUser}"]`);
+      if (ownButton) {
+        ownButton.style.display = 'block';
+        if (!isAdminUser) {
+          ownButton.style.opacity = '0.5';
+          ownButton.style.cursor = 'default';
+          ownButton.style.pointerEvents = 'none';
+        } else {
+          ownButton.style.opacity = '1';
+          ownButton.style.cursor = 'pointer';
+          ownButton.style.pointerEvents = 'auto';
+        }
+      }
 
       loadData();
       updateUserHeaders();
@@ -2738,6 +2770,7 @@
       firebase.auth().signOut().then(() => {
         document.getElementById('loginModal').style.display = 'flex';
         document.getElementById('appContainer').style.display = 'none';
+        document.getElementById('logged-in-user').textContent = '—';
         document.getElementById('emailInput').value = '';
         document.getElementById('passwordInput').value = '';
         document.getElementById('loginError').classList.remove('show');
