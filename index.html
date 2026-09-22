@@ -2737,9 +2737,13 @@
       const userName = users[currentUser].name;
       document.getElementById('logged-in-user').textContent = userName;
 
-      // Hide admin-only sections for non-admins
+      // Hide admin-only sections and nav items for non-admins
       const isAdminUser = users[currentUser].role === 'admin';
+      // Hide from sidebar
       document.querySelector('[data-section="all-tasks"]').style.display = isAdminUser ? 'block' : 'none';
+      document.querySelector('[data-section="create-task"]').style.display = isAdminUser ? 'block' : 'none';
+      // Hide sections
+      document.querySelector('#all-tasks').style.display = isAdminUser ? 'flex' : 'none';
       document.querySelector('#create-task').style.display = isAdminUser ? 'block' : 'none';
 
       // Hide user buttons for non-admins (Ivy and Angus)
