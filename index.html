@@ -684,6 +684,10 @@
     }
 
     .animal-breakdown-table tbody tr td {
+      color: var(--text-primary) !important;
+    }
+
+    .animal-breakdown-table tbody tr {
       color: var(--text-primary);
     }
 
@@ -805,6 +809,11 @@
         align-items: flex-start;
       }
 
+      .nav-item {
+        font-size: 11px;
+        padding: 6px 8px;
+      }
+
       .container {
         flex-direction: column;
       }
@@ -834,6 +843,28 @@
 
       .modal-content {
         width: 95%;
+      }
+
+      /* Mobile overrides for shop and stat cards */
+      [style*="grid-template-columns: repeat(3, 1fr)"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+
+      /* Even smaller on very small screens */
+      input[type="date"], input[type="time"], input[type="number"] {
+        font-size: 14px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      /* Extra small mobile */
+      [style*="grid-template-columns: repeat(3, 1fr)"] {
+        grid-template-columns: 1fr !important;
+      }
+
+      .nav-item {
+        font-size: 10px;
+        padding: 5px 6px;
       }
     }
 
