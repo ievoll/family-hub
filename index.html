@@ -296,9 +296,9 @@
       -webkit-appearance: none;
       -moz-appearance: none;
       appearance: none;
-      background: var(--bg-secondary) !important;
-      color: var(--text-primary) !important;
-      border: 2px solid var(--border) !important;
+      background: #555555 !important;
+      color: #ffffff !important;
+      border: 2px solid #888888 !important;
       width: 100% !important;
       padding: 10px !important;
       font-size: 16px !important;
@@ -840,6 +840,21 @@
         flex-direction: column;
       }
 
+      /* Shop layout: stack cart below items on mobile */
+      #shop-layout {
+        flex-direction: column !important;
+        gap: 24px !important;
+        overflow: visible !important;
+      }
+
+      #shop-cart {
+        width: 100% !important;
+        border-left: none !important;
+        border-top: 1px solid var(--border) !important;
+        padding-left: 0 !important;
+        padding-top: 16px !important;
+      }
+
       .sidebar {
         width: 100%;
         border-right: none;
@@ -1072,7 +1087,7 @@
         <!-- Create Task -->
         <section id="create-task" class="section">
           <div class="header">
-            <h2>creat Task or Event</h2>
+            <h2>Create Task or Event</h2>
             <p>Add a new task or event to your list</p>
             <div style="display: flex; gap: 16px; margin-top: 12px;">
               <label style="display: flex; align-items: center; gap: 8px;">
@@ -1264,7 +1279,7 @@
             </div>
           </div>
 
-          <div style="display: flex; gap: 24px; flex: 1; overflow: hidden;">
+          <div id="shop-layout" style="display: flex; gap: 24px; flex: 1; overflow: hidden;">
             <!-- Store -->
             <div style="flex: 1; display: flex; flex-direction: column; gap: 16px; overflow-y: auto; padding-right: 12px;">
               <h3 style="font-size: 16px; font-weight: 600; margin-top: 8px;">Available Items</h3>
@@ -1272,7 +1287,7 @@
             </div>
 
             <!-- Cart -->
-            <div style="width: 300px; display: flex; flex-direction: column; gap: 12px; border-left: 1px solid var(--border); padding-left: 20px;">
+            <div id="shop-cart" style="width: 300px; display: flex; flex-direction: column; gap: 12px; border-left: 1px solid var(--border); padding-left: 20px;">
               <div>
                 <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px;">Your Cart</h3>
                 <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 12px;">
