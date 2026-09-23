@@ -296,12 +296,22 @@
       -webkit-appearance: none;
       -moz-appearance: none;
       appearance: none;
-      background: var(--bg-primary) !important;
+      background: var(--bg-secondary) !important;
       color: var(--text-primary) !important;
+      border: 2px solid var(--border) !important;
+      width: 100% !important;
+      padding: 10px !important;
+      font-size: 16px !important;
     }
 
     input[type="date"]::-webkit-calendar-picker-indicator {
       filter: invert(0.8);
+    }
+
+    input[type="date"]::-webkit-outer-spin-button,
+    input[type="date"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
     }
 
     input::placeholder {
@@ -1062,7 +1072,7 @@
         <!-- Create Task -->
         <section id="create-task" class="section">
           <div class="header">
-            <h2>create Task or Event</h2>
+            <h2>creat Task or Event</h2>
             <p>Add a new task or event to your list</p>
             <div style="display: flex; gap: 16px; margin-top: 12px;">
               <label style="display: flex; align-items: center; gap: 8px;">
