@@ -292,6 +292,18 @@
       font-size: 13px;
     }
 
+    input[type="date"], input[type="time"], input[type="number"] {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background: var(--bg-primary) !important;
+      color: var(--text-primary) !important;
+    }
+
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(0.8);
+    }
+
     input::placeholder {
       color: var(--text-tertiary);
     }
@@ -1050,7 +1062,7 @@
         <!-- Create Task -->
         <section id="create-task" class="section">
           <div class="header">
-            <h2>Create Task or Event</h2>
+            <h2>create Task or Event</h2>
             <p>Add a new task or event to your list</p>
             <div style="display: flex; gap: 16px; margin-top: 12px;">
               <label style="display: flex; align-items: center; gap: 8px;">
