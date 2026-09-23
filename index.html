@@ -171,15 +171,16 @@
     }
 
     .nav-item {
-      padding: 10px 12px;
+      padding: 8px 10px;
       padding-left: 0;
       cursor: pointer;
       border-radius: 6px;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 500;
       transition: background 0.2s;
       border: 1px solid transparent;
       color: var(--text-secondary);
+      white-space: nowrap;
     }
 
     .nav-item:hover {
@@ -269,9 +270,9 @@
     .task-assign-grid {
       display: flex;
       flex-direction: row;
-      gap: 32px;
+      gap: 16px;
       align-items: center;
-      flex-wrap: nowrap;
+      flex-wrap: wrap;
     }
 
     .task-assign-grid label {
@@ -660,6 +661,7 @@
       text-align: center;
       border-bottom: 1px solid var(--border);
       font-size: 13px;
+      color: var(--text-primary);
     }
 
     .animal-breakdown-table th:first-child,
@@ -675,6 +677,14 @@
 
     .animal-breakdown-table tr:last-child td {
       border-bottom: none;
+    }
+
+    .animal-breakdown-table tbody tr {
+      background: var(--bg-secondary);
+    }
+
+    .animal-breakdown-table tbody tr td {
+      color: var(--text-primary);
     }
 
     .rank-badge {
@@ -1061,18 +1071,20 @@
                 <option value="rhino">🦏 Rhino (50 WB)</option>
                 <option value="elephant">🐘 Elephant (100 WB)</option>
               </select>
-              <input type="date" id="task-due-date" placeholder="Start date">
+              <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Start Date</label>
+              <input type="date" id="task-due-date" placeholder="Start date" style="background: var(--bg-primary); color: var(--text-primary);">
               <div style="display: flex; gap: 8px; align-items: center;">
-                <span style="font-size: 12px; color: var(--text-muted);">Start time:</span>
+                <span style="font-size: 12px; color: var(--text-secondary);">Start Time (optional):</span>
                 <input type="number" id="task-due-hour" placeholder="Hour" min="0" max="23" style="flex: 0 0 60px; width: 60px;">
                 <input type="number" id="task-due-minute" placeholder="Min" min="0" max="59" style="flex: 0 0 60px; width: 60px;">
               </div>
               <div style="display: flex; gap: 8px; align-items: center;">
-                <span style="font-size: 12px; color: var(--text-muted);">Duration:</span>
+                <span style="font-size: 12px; color: var(--text-secondary);">Duration (optional):</span>
                 <input type="number" id="task-duration-hour" placeholder="Hours" min="0" max="23" style="flex: 0 0 60px; width: 60px;">
                 <input type="number" id="task-duration-minute" placeholder="Mins" min="0" max="59" style="flex: 0 0 60px; width: 60px;">
               </div>
-              <input type="date" id="task-end-date" placeholder="End date (optional)">
+              <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px;">End Date (optional)</label>
+              <input type="date" id="task-end-date" placeholder="End date (optional)" style="background: var(--bg-primary); color: var(--text-primary);">
               <select id="task-recur" onchange="updateRecurringFields()">
                 <option value="once">Once</option>
                 <option value="daily">Daily</option>
@@ -1184,18 +1196,18 @@
             <p>Spend your Wuzzabucks on cool items!</p>
           </div>
 
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 20px;">
-            <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
-              <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">All Time Earned</div>
-              <div id="shop-earned" style="font-size: 24px; font-weight: 700; color: var(--accent);">0 WB</div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px;">
+            <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Earned</div>
+              <div id="shop-earned" style="font-size: 18px; font-weight: 700; color: var(--accent);">0 WB</div>
             </div>
-            <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
-              <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Total Spent</div>
-              <div id="shop-spent" style="font-size: 24px; font-weight: 700; color: #ef4444;">0 WB</div>
+            <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Spent</div>
+              <div id="shop-spent" style="font-size: 18px; font-weight: 700; color: #ef4444;">0 WB</div>
             </div>
-            <div style="background: var(--bg-secondary); padding: 16px; border-radius: 8px; border: 1px solid var(--border);">
-              <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Remaining</div>
-              <div id="shop-remaining" style="font-size: 24px; font-weight: 700; color: #f59e0b;">0 WB</div>
+            <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
+              <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Remaining</div>
+              <div id="shop-remaining" style="font-size: 18px; font-weight: 700; color: #f59e0b;">0 WB</div>
             </div>
           </div>
 
