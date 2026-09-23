@@ -805,13 +805,13 @@
 
     @media (max-width: 768px) {
       .top-bar {
-        flex-direction: column;
-        align-items: flex-start;
+        flex-direction: column !important;
+        align-items: flex-start !important;
       }
 
       .nav-item {
-        font-size: 11px;
-        padding: 6px 8px;
+        font-size: 11px !important;
+        padding: 6px 8px !important;
       }
 
       .container {
@@ -845,8 +845,8 @@
         width: 95%;
       }
 
-      /* Mobile overrides for shop and stat cards */
-      [style*="grid-template-columns: repeat(3, 1fr)"] {
+      /* Mobile overrides for shop grids */
+      #shop-items > div, #shop-stats {
         grid-template-columns: repeat(2, 1fr) !important;
       }
 
@@ -857,8 +857,8 @@
     }
 
     @media (max-width: 480px) {
-      /* Extra small mobile */
-      [style*="grid-template-columns: repeat(3, 1fr)"] {
+      /* Extra small mobile - single column */
+      #shop-items > div, #shop-stats {
         grid-template-columns: 1fr !important;
       }
 
@@ -1227,7 +1227,7 @@
             <p>Spend your Wuzzabucks on cool items!</p>
           </div>
 
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px;">
+          <div id="shop-stats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px;">
             <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
               <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Earned</div>
               <div id="shop-earned" style="font-size: 18px; font-weight: 700; color: var(--accent);">0 WB</div>
