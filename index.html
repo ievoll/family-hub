@@ -39,11 +39,11 @@
       --cat-fitness: #ef4444;
 
       /* Task size colors */
-      --size-ant: #fef3c7;
-      --size-beaver: #fed7aa;
-      --size-deer: #dbeafe;
-      --size-rhino: #d1d5db;
-      --size-elephant: #e9d5ff;
+      --size-ant: #fbbf24;
+      --size-beaver: #f97316;
+      --size-deer: #3b82f6;
+      --size-rhino: #6b7280;
+      --size-elephant: #a78bfa;
 
       /* Person colors */
       --person-ian: #3b82f6;
@@ -175,7 +175,7 @@
       padding-left: 0;
       cursor: pointer;
       border-radius: 6px;
-      font-size: 13px;
+      font-size: 15px;
       font-weight: 500;
       transition: background 0.2s;
       border: 1px solid transparent;
@@ -644,6 +644,32 @@
     }
 
     .leaderboard-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .animal-breakdown-table {
+      width: auto;
+      border-collapse: collapse;
+      background: var(--bg-secondary);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .animal-breakdown-table th,
+    .animal-breakdown-table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    .animal-breakdown-table th {
+      background: var(--bg-tertiary);
+      font-weight: 600;
+    }
+
+    .animal-breakdown-table tr:last-child td {
       border-bottom: none;
     }
 
@@ -1207,7 +1233,7 @@
         </section>
 
         <!-- All Tasks (admins only) - renamed to My Tasks for unified view -->
-        <section id="all-tasks" class="section" style="display: none;">
+        <section id="all-tasks" class="section">
           <div class="header">
             <h2>My Tasks</h2>
             <p id="all-tasks-desc">View and manage tasks</p>
@@ -1655,11 +1681,16 @@
       document.getElementById('calendar-categories-filter').style.display = isAdmin ? 'block' : 'none';
       document.getElementById('calendar-show-all-filter').style.display = isAdmin ? 'block' : 'none';
 
-      // For admins, default to showing all. For non-admins, lock to their own tasks
-      if (isAdmin) {
-        calendarFilters.person = 'all';
-      } else {
-        calendarFilters.person = currentUser;
+      // For admins, default to their own tasks. For non-admins, lock to their own tasks
+      calendarFilters.person = currentUser;
+
+      // Update calendar person filter button states
+      document.querySelectorAll('[data-filter="person"]').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      const activePersonBtn = document.querySelector(`[data-filter="person"][data-value="${currentUser}"]`);
+      if (activePersonBtn) {
+        activePersonBtn.classList.add('active');
       }
     }
 
@@ -2501,7 +2532,7 @@
         }).join('');
 
         animalTable += `
-          <tr style="background-color: var(--size-${sizeKey});">
+          <tr style="background-color: var(--size-${sizeKey}); color: white;">
             <td><strong>${sizeInfo.label} [${sizeInfo.wb} WB]</strong></td>
             ${cells}
             <td><strong>${rowTotal}</strong></td>
@@ -2825,10 +2856,6 @@
       // Hide admin-only nav items for non-admins
       const isAdminUser = users[currentUser].role === 'admin';
       document.querySelector('[data-section="create-task"]').style.display = isAdminUser ? 'block' : 'none';
-
-      // For admins, show all-tasks section; for members, show my-tasks section
-      document.getElementById('all-tasks').style.display = isAdminUser ? 'none' : 'none'; // Hidden by default
-      document.getElementById('my-tasks').style.display = isAdminUser ? 'none' : 'block';
 
       // Hide user buttons for non-admins (Ivy and Angus)
       document.querySelectorAll('.user-btn').forEach(btn => {
