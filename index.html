@@ -175,7 +175,7 @@
       padding-left: 0;
       cursor: pointer;
       border-radius: 6px;
-      font-size: 15px;
+      font-size: 17px;
       font-weight: 500;
       transition: background 0.2s;
       border: 1px solid transparent;
@@ -924,6 +924,12 @@
       .top-bar h1 {
         font-size: 16px !important;
       }
+
+      .animal-breakdown-table th,
+      .animal-breakdown-table td {
+        padding: 8px 10px !important;
+        font-size: 12px !important;
+      }
     }
 
     @media (max-width: 360px) {
@@ -935,6 +941,12 @@
 
       .top-bar h1 {
         font-size: 14px !important;
+      }
+
+      .animal-breakdown-table th,
+      .animal-breakdown-table td {
+        padding: 6px 8px !important;
+        font-size: 11px !important;
       }
     }
 
@@ -1211,7 +1223,7 @@
         <section id="my-tasks" class="section">
           <div class="header">
             <h2 id="my-tasks-header">My Tasks</h2>
-            <p>Tasks assigned to you</p>
+            <p id="my-tasks-person-label">Tasks assigned to you</p>
           </div>
 
           <div class="filter-bar">
@@ -1668,6 +1680,7 @@
     function updateUserHeaders() {
       const userName = users[currentUser].name;
       document.getElementById('my-tasks-header').textContent = `${userName}'s Tasks`;
+      document.getElementById('my-tasks-person-label').textContent = `Showing ${userName}'s tasks`;
 
       // Special shop title for Ivy
       const shopTitle = currentUser === 'ivy' ? 'Ivy Flower Head Shop' : `${userName}'s Shop`;
