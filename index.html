@@ -167,7 +167,7 @@
     .nav {
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 4px;
     }
 
     .nav-item {
@@ -175,7 +175,7 @@
       padding-left: 0;
       cursor: pointer;
       border-radius: 6px;
-      font-size: 12px;
+      font-size: 13px;
       font-weight: 500;
       transition: background 0.2s;
       border: 1px solid transparent;
@@ -1032,11 +1032,10 @@
     <div class="container">
       <div class="sidebar">
         <div class="nav">
-          <div class="nav-item" data-section="leaderboard">🏆 Leaderboard</div>
-          <div class="nav-item" data-section="create-task">➕ Create Task</div>
+          <div class="nav-item" data-section="leaderboard">🏆 Medals</div>
+          <div class="nav-item" data-section="create-task">➕ Create</div>
           <div class="nav-item active" data-section="calendar">📅 Calendar</div>
           <div class="nav-item" data-section="my-tasks">✓ My Tasks</div>
-          <div class="nav-item" data-section="all-tasks">📋 All Tasks</div>
           <div class="nav-item" data-section="shop">🛒 Shop</div>
         </div>
       </div>
@@ -1094,7 +1093,7 @@
         <!-- Create Task -->
         <section id="create-task" class="section">
           <div class="header">
-            <h2>Create Task or Event</h2>
+            <h2>Create</h2>
             <p>Add a new task or event to your list</p>
             <div style="display: flex; gap: 16px; margin-top: 12px;">
               <label style="display: flex; align-items: center; gap: 8px;">
@@ -1207,11 +1206,11 @@
           <div class="items-list" id="my-tasks-list"></div>
         </section>
 
-        <!-- All Tasks (admins only) -->
-        <section id="all-tasks" class="section">
+        <!-- All Tasks (admins only) - renamed to My Tasks for unified view -->
+        <section id="all-tasks" class="section" style="display: none;">
           <div class="header">
-            <h2>All Tasks</h2>
-            <p>Manage all family tasks</p>
+            <h2>My Tasks</h2>
+            <p id="all-tasks-desc">View and manage tasks</p>
           </div>
 
           <div class="filter-bar">
@@ -1245,7 +1244,7 @@
         <!-- Leaderboard -->
         <section id="leaderboard" class="section">
           <div class="header">
-            <h2>Leaderboard</h2>
+            <h2>Medals</h2>
             <p>Total wuzzabucks from completed tasks</p>
           </div>
 
@@ -1675,8 +1674,7 @@
       document.querySelector(`[data-user="${userId}"]`).classList.add('active');
 
       const isAdmin = users[userId].role === 'admin';
-      document.querySelector('[data-section="all-tasks"]').style.display = isAdmin ? 'block' : 'none';
-      document.querySelector('#create-task').style.display = isAdmin ? 'block' : 'none';
+      document.querySelector('[data-section="create-task"]').style.display = isAdmin ? 'block' : 'none';
 
       updateUserHeaders();
       renderAll();
@@ -2735,9 +2733,26 @@
       item.addEventListener('click', (e) => {
         document.querySelectorAll('.nav-item').forEach(ni => ni.classList.remove('active'));
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-        
+
         e.target.classList.add('active');
-        const section = e.target.dataset.section;
+        let section = e.target.dataset.section;
+
+        // For admins, "My Tasks" nav item shows the all-tasks section with person filter
+        if (section === 'my-tasks' && users[currentUser].role === 'admin') {
+          section = 'all-tasks';
+          // Pre-select current user in person filter
+          setTimeout(() => {
+            document.querySelectorAll('[data-filter="person"]').forEach(btn => {
+              btn.classList.remove('active');
+            });
+            const currentUserBtn = document.querySelector(`[data-filter="person"][data-value="${currentUser}"]`);
+            if (currentUserBtn) {
+              currentUserBtn.classList.add('active');
+              updateAllTasksPersonFilter(currentUser, currentUserBtn);
+            }
+          }, 0);
+        }
+
         document.getElementById(section).classList.add('active');
       });
     });
@@ -2746,10 +2761,6 @@
     document.getElementById('edit-modal').addEventListener('click', (e) => {
       if (e.target.id === 'edit-modal') closeEditModal();
     });
-
-    if (!users[currentUser].role || users[currentUser].role !== 'admin') {
-      document.querySelector('[data-section="all-tasks"]').style.display = 'none';
-    }
 
     // Firebase Authentication functions
     function authenticateWithFirebase() {
@@ -2813,8 +2824,11 @@
 
       // Hide admin-only nav items for non-admins
       const isAdminUser = users[currentUser].role === 'admin';
-      document.querySelector('[data-section="all-tasks"]').style.display = isAdminUser ? 'block' : 'none';
       document.querySelector('[data-section="create-task"]').style.display = isAdminUser ? 'block' : 'none';
+
+      // For admins, show all-tasks section; for members, show my-tasks section
+      document.getElementById('all-tasks').style.display = isAdminUser ? 'none' : 'none'; // Hidden by default
+      document.getElementById('my-tasks').style.display = isAdminUser ? 'none' : 'block';
 
       // Hide user buttons for non-admins (Ivy and Angus)
       document.querySelectorAll('.user-btn').forEach(btn => {
