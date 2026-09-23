@@ -175,7 +175,7 @@
       padding-left: 0;
       cursor: pointer;
       border-radius: 6px;
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 500;
       transition: background 0.2s;
       border: 1px solid transparent;
@@ -913,7 +913,7 @@
       }
 
       .nav-item {
-        font-size: 9px !important;
+        font-size: 12px !important;
         padding: 4px 4px !important;
         margin: 0 2px !important;
       }
@@ -937,7 +937,7 @@
     @media (max-width: 360px) {
       /* Very narrow mobile */
       .nav-item {
-        font-size: 8px !important;
+        font-size: 11px !important;
         padding: 3px 3px !important;
       }
 
@@ -1300,6 +1300,10 @@
           </div>
 
           <div class="leaderboard" id="leaderboard-content"></div>
+
+          <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border); display: none;" id="clear-data-section">
+            <button class="btn-small" style="font-size: 11px; opacity: 0.6;" onclick="showClearDataConfirm()">Clear All Data</button>
+          </div>
         </section>
 
         <!-- Shop -->
@@ -1410,6 +1414,18 @@
       <div class="modal-actions">
         <button class="btn-secondary" onclick="closeEditModal()">Cancel</button>
         <button onclick="saveEdit()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Clear Data Confirmation Modal -->
+  <div class="modal" id="clear-data-modal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">Clear All Data?</div>
+      <p style="color: var(--text-secondary); margin-bottom: 16px;">This will permanently delete all tasks, Wuzzabucks, and purchase history. This cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeClearDataModal()">No, Cancel</button>
+        <button style="background: var(--red); color: white;" onclick="confirmClearAllData()">Yes, Delete All Data</button>
       </div>
     </div>
   </div>
@@ -1614,26 +1630,33 @@
       });
     }
 
-    function clearAllData() {
-      if (confirm('Are you sure? This will delete all tasks, WB, and purchase history.')) {
-        tasks = [];
-        shopCart = {};
-        shopSpending = {};
-        earnedWBPerUser = {};
-        purchaseHistory = [];
-        claimedItems = [];
-        Object.keys(users).forEach(userId => {
-          shopSpending[userId] = 0;
-          earnedWBPerUser[userId] = 0;
-        });
-        database.ref('familyHub').remove().then(() => {
-          renderAll();
-          showTaskSuccess('✓ All data cleared!');
-        }).catch(error => {
-          console.error('Failed to clear data:', error);
-          showTaskError('Failed to clear data');
-        });
-      }
+    function showClearDataConfirm() {
+      document.getElementById('clear-data-modal').classList.add('active');
+    }
+
+    function closeClearDataModal() {
+      document.getElementById('clear-data-modal').classList.remove('active');
+    }
+
+    function confirmClearAllData() {
+      tasks = [];
+      shopCart = {};
+      shopSpending = {};
+      earnedWBPerUser = {};
+      purchaseHistory = [];
+      claimedItems = [];
+      Object.keys(users).forEach(userId => {
+        shopSpending[userId] = 0;
+        earnedWBPerUser[userId] = 0;
+      });
+      database.ref('familyHub').remove().then(() => {
+        closeClearDataModal();
+        renderAll();
+        showTaskSuccess('✓ All data cleared!');
+      }).catch(error => {
+        console.error('Failed to clear data:', error);
+        showTaskError('Failed to clear data');
+      });
     }
 
     function claimItem(purchaseIndex) {
@@ -1694,6 +1717,9 @@
       document.getElementById('calendar-person-filter').style.display = isAdmin ? 'block' : 'none';
       document.getElementById('calendar-categories-filter').style.display = isAdmin ? 'block' : 'none';
       document.getElementById('calendar-show-all-filter').style.display = isAdmin ? 'block' : 'none';
+
+      // Show clear data button only for admins
+      document.getElementById('clear-data-section').style.display = isAdmin ? 'block' : 'none';
 
       // For admins, default to their own tasks. For non-admins, lock to their own tasks
       calendarFilters.person = currentUser;
@@ -2805,6 +2831,10 @@
     // Close modal on outside click
     document.getElementById('edit-modal').addEventListener('click', (e) => {
       if (e.target.id === 'edit-modal') closeEditModal();
+    });
+
+    document.getElementById('clear-data-modal').addEventListener('click', (e) => {
+      if (e.target.id === 'clear-data-modal') closeClearDataModal();
     });
 
     // Firebase Authentication functions
