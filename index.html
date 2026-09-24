@@ -1118,12 +1118,6 @@
                 <div class="filter-label">Categories</div>
                 <div class="category-filters" id="calendar-category-filters"></div>
               </div>
-              <div class="filter-group" id="calendar-show-all-filter">
-                <label style="display: flex; align-items: center; gap: 8px; margin: 0;">
-                  <input type="checkbox" id="calendar-show-all-tasks" onchange="toggleCalendarShowAll()">
-                  <span style="font-size: 13px;">Show All Tasks</span>
-                </label>
-              </div>
             </div>
 
             <div class="calendar-grid" id="calendar-grid"></div>
@@ -1148,10 +1142,8 @@
           </div>
 
           <div class="add-form">
-            <div id="task-error" style="display: none; background-color: #fee2e2; color: #dc2626; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; border: 1px solid #fecaca;"></div>
-            <div id="task-success" style="display: none; background-color: #dcfce7; color: #16a34a; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; border: 1px solid #bbf7d0;"></div>
             <div class="task-form">
-              <input type="text" id="task-title" placeholder="Task title...">
+              <input type="text" id="task-title" placeholder="Title">
               <fieldset>
                 <legend style="padding: 0 8px;">Assign to:</legend>
                 <div class="task-assign-grid">
@@ -1216,7 +1208,9 @@
                 <input type="checkbox" id="task-completed" style="width: 16px; height: 16px; cursor: pointer;">
                 Mark as completed
               </label>
-              <button onclick="addTask()">Add Task</button>
+              <button onclick="addTask()">Add</button>
+              <div id="task-error" style="display: none; background-color: #fee2e2; color: #dc2626; padding: 12px; border-radius: 6px; margin-top: 12px; font-size: 13px; border: 1px solid #fecaca;"></div>
+              <div id="task-success" style="display: none; background-color: #dcfce7; color: #16a34a; padding: 12px; border-radius: 6px; margin-top: 12px; font-size: 13px; border: 1px solid #bbf7d0;"></div>
             </div>
           </div>
         </section>
@@ -1403,7 +1397,17 @@
       <div class="form-group">
         <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Due Date</label>
         <input type="date" id="edit-task-due-date">
-        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Recurrence</label>
+        <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px;">
+          <span style="font-size: 12px; color: var(--text-secondary);">Start Time (optional):</span>
+          <input type="number" id="edit-task-due-hour" placeholder="Hour" min="0" max="23" style="flex: 0 0 60px; width: 60px;">
+          <input type="number" id="edit-task-due-minute" placeholder="Min" min="0" max="59" style="flex: 0 0 60px; width: 60px;">
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px;">
+          <span style="font-size: 12px; color: var(--text-secondary);">Duration (optional):</span>
+          <input type="number" id="edit-task-duration-hour" placeholder="Hours" min="0" max="23" style="flex: 0 0 60px; width: 60px;">
+          <input type="number" id="edit-task-duration-minute" placeholder="Mins" min="0" max="59" style="flex: 0 0 60px; width: 60px;">
+        </div>
+        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px; margin-top: 8px;">Recurrence</label>
         <select id="edit-task-recur">
           <option value="once">Once</option>
           <option value="daily">Daily</option>
@@ -1716,7 +1720,6 @@
       const isAdmin = users[currentUser].role === 'admin';
       document.getElementById('calendar-person-filter').style.display = isAdmin ? 'block' : 'none';
       document.getElementById('calendar-categories-filter').style.display = isAdmin ? 'block' : 'none';
-      document.getElementById('calendar-show-all-filter').style.display = isAdmin ? 'block' : 'none';
 
       // Show clear data button only for admins
       document.getElementById('clear-data-section').style.display = isAdmin ? 'block' : 'none';
@@ -2000,8 +2003,35 @@
       document.getElementById('edit-task-title').value = task.title;
       document.getElementById('edit-task-category').value = task.category;
       document.getElementById('edit-task-size').value = task.size;
-      document.getElementById('edit-task-due-date').value = task.dueDate;
       document.getElementById('edit-task-recur').value = task.recurPattern || 'once';
+
+      // Parse dueDate which may contain time (e.g., "2024-09-24 14:30" or "2024-09-24")
+      const dueDateStr = task.dueDate || '';
+      const dueDateParts = dueDateStr.split(' ');
+      const dateOnly = dueDateParts[0];
+      const timeStr = dueDateParts[1]; // e.g., "14:30"
+
+      document.getElementById('edit-task-due-date').value = dateOnly;
+
+      // Parse and set due time
+      if (timeStr) {
+        const [hour, minute] = timeStr.split(':');
+        document.getElementById('edit-task-due-hour').value = hour || '';
+        document.getElementById('edit-task-due-minute').value = minute || '';
+      } else {
+        document.getElementById('edit-task-due-hour').value = '';
+        document.getElementById('edit-task-due-minute').value = '';
+      }
+
+      // Parse and set duration (format is "1:30")
+      if (task.duration) {
+        const [hour, minute] = task.duration.split(':');
+        document.getElementById('edit-task-duration-hour').value = hour || '';
+        document.getElementById('edit-task-duration-minute').value = minute || '';
+      } else {
+        document.getElementById('edit-task-duration-hour').value = '';
+        document.getElementById('edit-task-duration-minute').value = '';
+      }
 
       document.getElementById('edit-modal').classList.add('active');
     }
@@ -2020,8 +2050,19 @@
       task.title = document.getElementById('edit-task-title').value.trim();
       task.category = document.getElementById('edit-task-category').value;
       task.size = document.getElementById('edit-task-size').value;
-      task.dueDate = document.getElementById('edit-task-due-date').value;
       task.recurPattern = document.getElementById('edit-task-recur').value;
+
+      // Format due date with time if provided
+      const dueDate = document.getElementById('edit-task-due-date').value;
+      const dueHour = document.getElementById('edit-task-due-hour').value;
+      const dueMinute = document.getElementById('edit-task-due-minute').value;
+      const formattedDueDate = dueDate + (dueHour || dueMinute ? ` ${String(dueHour || '00').padStart(2, '0')}:${String(dueMinute || '00').padStart(2, '0')}` : '');
+      task.dueDate = formattedDueDate;
+
+      // Format and save duration
+      const durationHour = document.getElementById('edit-task-duration-hour').value;
+      const durationMinute = document.getElementById('edit-task-duration-minute').value;
+      task.duration = (durationHour || durationMinute) ? `${durationHour || '0'}:${String(durationMinute || '0').padStart(2, '0')}` : null;
 
       saveData();
       closeEditModal();
@@ -2323,6 +2364,25 @@
         // Apply category filter
         dayTasks = dayTasks.filter(t => calendarFilters.categories.has(t.category));
 
+        // Sort tasks by time: items with no time first, then by hour/minute
+        dayTasks.sort((a, b) => {
+          const aHasTime = a.dueDate && a.dueDate.includes(' ');
+          const bHasTime = b.dueDate && b.dueDate.includes(' ');
+
+          // Items without time come first
+          if (!aHasTime && bHasTime) return -1;
+          if (aHasTime && !bHasTime) return 1;
+
+          // If both have time or both don't have time, sort by time
+          if (aHasTime && bHasTime) {
+            const aTime = a.dueDate.split(' ')[1]; // "HH:MM"
+            const bTime = b.dueDate.split(' ')[1];
+            return aTime.localeCompare(bTime); // String comparison works for HH:MM format
+          }
+
+          return 0; // Keep original order if no time to sort by
+        });
+
         html += `<div class="calendar-day ${isOtherMonth ? 'other-month' : ''}">
           <div class="calendar-day-number">${current.getDate()}</div>
           <div class="calendar-tasks">
@@ -2358,6 +2418,44 @@
 
       // Apply category filter
       myTasks = myTasks.filter(t => myTasksFilters.categories.has(t.category));
+
+      // For recurring tasks, show only the next uncompleted instance in each series
+      const seriesMap = {};
+      myTasks = myTasks.filter(t => {
+        const isRecurring = t.recurPattern && t.recurPattern !== 'once';
+        if (!isRecurring) {
+          return true; // Keep all single tasks
+        }
+
+        // Create a series key: title + assignedBy + recurPattern + maxOccurrences
+        const seriesKey = `${t.title}|${t.assignedBy}|${t.recurPattern}|${t.maxOccurrences || 'none'}`;
+
+        if (!(seriesKey in seriesMap)) {
+          seriesMap[seriesKey] = [];
+        }
+        seriesMap[seriesKey].push(t);
+        return true; // Temporarily keep all
+      });
+
+      // Now filter to keep only the next uncompleted in each series
+      const tasksToRemove = new Set();
+      Object.values(seriesMap).forEach(series => {
+        // Find the first uncompleted task in occurrence order
+        series.sort((a, b) => (a.occurrenceNumber || 1) - (b.occurrenceNumber || 1));
+
+        let foundUncompleted = false;
+        series.forEach(task => {
+          if (!foundUncompleted && !task.completed) {
+            // This is the next uncompleted one - keep it
+            foundUncompleted = true;
+          } else {
+            // Either already found uncompleted, or this one is completed - remove it
+            tasksToRemove.add(task.id);
+          }
+        });
+      });
+
+      myTasks = myTasks.filter(t => !tasksToRemove.has(t.id));
 
       myTasks.sort((a, b) => parseTaskDate(a.dueDate) - parseTaskDate(b.dueDate));
       
@@ -2422,6 +2520,44 @@
 
         // Apply category filter
         userTasks = userTasks.filter(t => allTasksFilters.categories.has(t.category));
+
+        // For recurring tasks, show only the next uncompleted instance in each series
+        const seriesMap = {};
+        userTasks = userTasks.filter(t => {
+          const isRecurring = t.recurPattern && t.recurPattern !== 'once';
+          if (!isRecurring) {
+            return true; // Keep all single tasks
+          }
+
+          // Create a series key: title + assignedBy + recurPattern + maxOccurrences
+          const seriesKey = `${t.title}|${t.assignedBy}|${t.recurPattern}|${t.maxOccurrences || 'none'}`;
+
+          if (!(seriesKey in seriesMap)) {
+            seriesMap[seriesKey] = [];
+          }
+          seriesMap[seriesKey].push(t);
+          return true; // Temporarily keep all
+        });
+
+        // Now filter to keep only the next uncompleted in each series
+        const tasksToRemove = new Set();
+        Object.values(seriesMap).forEach(series => {
+          // Find the first uncompleted task in occurrence order
+          series.sort((a, b) => (a.occurrenceNumber || 1) - (b.occurrenceNumber || 1));
+
+          let foundUncompleted = false;
+          series.forEach(task => {
+            if (!foundUncompleted && !task.completed) {
+              // This is the next uncompleted one - keep it
+              foundUncompleted = true;
+            } else {
+              // Either already found uncompleted, or this one is completed - remove it
+              tasksToRemove.add(task.id);
+            }
+          });
+        });
+
+        userTasks = userTasks.filter(t => !tasksToRemove.has(t.id));
 
         userTasks.sort((a, b) => parseTaskDate(a.dueDate) - parseTaskDate(b.dueDate));
 
