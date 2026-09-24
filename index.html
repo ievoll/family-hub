@@ -1307,6 +1307,13 @@
             <p>Spend your Wuzzabucks on cool items!</p>
           </div>
 
+          <div id="shop-person-filter" class="filter-bar" style="display: none; margin-bottom: 20px;">
+            <div class="filter-group">
+              <div class="filter-label">Person</div>
+              <div class="filter-buttons" id="shop-person-buttons"></div>
+            </div>
+          </div>
+
           <div id="shop-stats" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 20px;">
             <div style="background: var(--bg-secondary); padding: 12px; border-radius: 8px; border: 1px solid var(--border);">
               <div style="font-size: 11px; color: var(--text-secondary); margin-bottom: 4px; text-transform: uppercase; font-weight: 600;">Earned</div>
@@ -1363,58 +1370,93 @@
 
   <!-- Edit Modal -->
   <div class="modal" id="edit-modal">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 500px;">
       <div class="modal-header">Edit Task</div>
-      <div class="form-group form-group-full">
-        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Title</label>
-        <input type="text" id="edit-task-title" class="form-group-full">
+
+      <!-- Title -->
+      <div style="margin-bottom: 24px;">
+        <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Title</label>
+        <input type="text" id="edit-task-title" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
       </div>
-      <div class="form-group">
-        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Category</label>
-        <select id="edit-task-category">
-          <option value="chores">🏠 Chores</option>
-          <option value="homework">✏️ Homework</option>
-          <option value="career">💼 Career</option>
-          <option value="books">📚 Books</option>
-          <option value="innovation">💡 Innovation</option>
-          <option value="building">🔨 Building</option>
-          <option value="study">🎓 Study</option>
-          <option value="challenge">⚡ Challenge</option>
-          <option value="social">💬 Social</option>
-          <option value="travel">✈️ Travel</option>
-          <option value="fitness">💪 Fitness</option>
-          <option value="other">📌 Other</option>
-        </select>
-        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Size</label>
-        <select id="edit-task-size">
-          <option value="ant">🐜 Ant (5 WB)</option>
-          <option value="beaver">🦫 Beaver (10 WB)</option>
-          <option value="deer">🦌 Deer (25 WB)</option>
-          <option value="rhino">🦏 Rhino (50 WB)</option>
-          <option value="elephant">🐘 Elephant (100 WB)</option>
-        </select>
+
+      <!-- Category and Size -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+        <div>
+          <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Category</label>
+          <select id="edit-task-category" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
+            <option value="chores">🏠 Chores</option>
+            <option value="homework">✏️ Homework</option>
+            <option value="career">💼 Career</option>
+            <option value="books">📚 Books</option>
+            <option value="innovation">💡 Innovation</option>
+            <option value="building">🔨 Building</option>
+            <option value="study">🎓 Study</option>
+            <option value="challenge">⚡ Challenge</option>
+            <option value="social">💬 Social</option>
+            <option value="travel">✈️ Travel</option>
+            <option value="fitness">💪 Fitness</option>
+            <option value="other">📌 Other</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Size</label>
+          <select id="edit-task-size" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
+            <option value="ant">🐜 Ant (5 WB)</option>
+            <option value="beaver">🦫 Beaver (10 WB)</option>
+            <option value="deer">🦌 Deer (25 WB)</option>
+            <option value="rhino">🦏 Rhino (50 WB)</option>
+            <option value="elephant">🐘 Elephant (100 WB)</option>
+          </select>
+        </div>
       </div>
-      <div class="form-group">
-        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Due Date</label>
-        <input type="date" id="edit-task-due-date">
-        <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px;">
-          <span style="font-size: 12px; color: var(--text-secondary);">Start Time (optional):</span>
-          <input type="number" id="edit-task-due-hour" placeholder="Hour" min="0" max="23" style="flex: 0 0 60px; width: 60px;">
-          <input type="number" id="edit-task-due-minute" placeholder="Min" min="0" max="59" style="flex: 0 0 60px; width: 60px;">
+
+      <!-- Due Date -->
+      <div style="margin-bottom: 24px;">
+        <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Due Date</label>
+        <input type="date" id="edit-task-due-date" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
+      </div>
+
+      <!-- Start Time -->
+      <div style="margin-bottom: 24px;">
+        <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Start Time <span style="font-weight: 400;">(optional)</span></label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <label style="font-size: 12px; color: var(--text-tertiary); display: block; margin-bottom: 6px;">Hour</label>
+            <input type="number" id="edit-task-due-hour" placeholder="0-23" min="0" max="23" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
+          </div>
+          <div>
+            <label style="font-size: 12px; color: var(--text-tertiary); display: block; margin-bottom: 6px;">Minute</label>
+            <input type="number" id="edit-task-due-minute" placeholder="0-59" min="0" max="59" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
+          </div>
         </div>
-        <div style="display: flex; gap: 8px; align-items: center; margin-top: 8px;">
-          <span style="font-size: 12px; color: var(--text-secondary);">Duration (optional):</span>
-          <input type="number" id="edit-task-duration-hour" placeholder="Hours" min="0" max="23" style="flex: 0 0 60px; width: 60px;">
-          <input type="number" id="edit-task-duration-minute" placeholder="Mins" min="0" max="59" style="flex: 0 0 60px; width: 60px;">
+      </div>
+
+      <!-- Duration -->
+      <div style="margin-bottom: 24px;">
+        <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Duration <span style="font-weight: 400;">(optional)</span></label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <label style="font-size: 12px; color: var(--text-tertiary); display: block; margin-bottom: 6px;">Hours</label>
+            <input type="number" id="edit-task-duration-hour" placeholder="0-23" min="0" max="23" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
+          </div>
+          <div>
+            <label style="font-size: 12px; color: var(--text-tertiary); display: block; margin-bottom: 6px;">Minutes</label>
+            <input type="number" id="edit-task-duration-minute" placeholder="0-59" min="0" max="59" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
+          </div>
         </div>
-        <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px; margin-top: 8px;">Recurrence</label>
-        <select id="edit-task-recur">
+      </div>
+
+      <!-- Recurrence -->
+      <div style="margin-bottom: 24px;">
+        <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Recurrence</label>
+        <select id="edit-task-recur" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
           <option value="once">Once</option>
           <option value="daily">Daily</option>
           <option value="weekly">Weekly</option>
           <option value="monthly">Monthly</option>
         </select>
       </div>
+
       <div class="modal-actions">
         <button class="btn-secondary" onclick="closeEditModal()">Cancel</button>
         <button onclick="saveEdit()">Save Changes</button>
@@ -1519,6 +1561,7 @@
     let myTasksFilters = { status: 'all', categories: new Set(Object.keys(categories)) };
     let allTasksFilters = { person: 'all', status: 'all', categories: new Set(Object.keys(categories)) };
     let leaderboardFilters = { dateRange: 'all-time' };
+    let shopViewUser = 'ian'; // Track which user's shop is being viewed (for admin view)
     let calendarShowAll = false;
 
     // Double-click state cycling: toggles between "only-selected" and "all-selected"
@@ -1735,6 +1778,31 @@
       if (activePersonBtn) {
         activePersonBtn.classList.add('active');
       }
+
+      // Setup shop person filter for admins
+      document.getElementById('shop-person-filter').style.display = isAdmin ? 'block' : 'none';
+      if (isAdmin) {
+        const shopPersonButtonsContainer = document.getElementById('shop-person-buttons');
+        shopPersonButtonsContainer.innerHTML = Object.keys(users).map(userId => {
+          const isActive = (shopViewUser === userId) ? 'active' : '';
+          return `<button class="filter-btn ${isActive}" data-filter="shop-person" data-value="${userId}" onclick="updateShopPerson('${userId}')">${users[userId].name}</button>`;
+        }).join('');
+      }
+    }
+
+    function updateShopPerson(userId) {
+      if (!isAdmin()) return;
+
+      shopViewUser = userId;
+
+      // Update button states
+      document.querySelectorAll('[data-filter="shop-person"]').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector(`[data-filter="shop-person"][data-value="${userId}"]`).classList.add('active');
+
+      // Re-render shop for this user
+      renderShop(userId);
     }
 
     function switchUser(userId) {
@@ -2810,11 +2878,14 @@
       showTaskSuccess(`✓ Purchase complete! ${totalCost} WB spent.`);
     }
 
-    function renderShop() {
+    function renderShop(userId) {
+      // Use shopViewUser if no userId provided (for backward compatibility)
+      const viewUser = userId || shopViewUser;
+
       // Update stats
-      const totalEarned = calculateTotalWB(currentUser);
-      const totalSpent = shopSpending[currentUser];
-      const remaining = calculateSavings(currentUser);
+      const totalEarned = calculateTotalWB(viewUser);
+      const totalSpent = shopSpending[viewUser] || 0;
+      const remaining = totalEarned - totalSpent;
 
       document.getElementById('shop-earned').textContent = totalEarned + ' WB';
       document.getElementById('shop-spent').textContent = totalSpent + ' WB';
@@ -2836,14 +2907,16 @@
       }).join('');
       document.getElementById('shop-items').innerHTML = itemsHtml ? `<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">${itemsHtml}</div>` : '<p style="color: var(--text-secondary);">No items available</p>';
 
-      // Render cart
-      const savings = calculateSavings(currentUser);
-      document.getElementById('cart-savings').textContent = savings + ' WB';
+      // Render cart (only show if viewing current user's shop)
+      const showCart = (viewUser === currentUser && !isAdmin()) || (viewUser === currentUser && isAdmin());
+      if (showCart) {
+        const savings = calculateSavings(viewUser);
+        document.getElementById('cart-savings').textContent = savings + ' WB';
 
-      if (Object.keys(shopCart).length === 0) {
-        document.getElementById('cart-items').innerHTML = '<div style="color: var(--text-secondary); font-size: 13px; text-align: center; padding-top: 80px;">Your cart is empty</div>';
-        document.getElementById('cart-total').textContent = '0 WB';
-      } else {
+        if (Object.keys(shopCart).length === 0) {
+          document.getElementById('cart-items').innerHTML = '<div style="color: var(--text-secondary); font-size: 13px; text-align: center; padding-top: 80px;">Your cart is empty</div>';
+          document.getElementById('cart-total').textContent = '0 WB';
+        } else {
         const cartHtml = Object.keys(shopCart).map(itemId => {
           const item = shopItems[itemId];
           const qty = shopCart[itemId];
@@ -2867,8 +2940,10 @@
         document.getElementById('cart-total').textContent = total + ' WB';
       }
 
+      } // Close the showCart if statement
+
       // Render purchase history
-      const userHistory = purchaseHistory.filter(p => p.userId === currentUser);
+      const userHistory = purchaseHistory.filter(p => p.userId === viewUser);
       const historyHtml = userHistory.length === 0
         ? '<div style="padding: 12px; text-align: center; color: var(--text-secondary); font-size: 13px;">No purchases yet</div>'
         : userHistory.map((purchase, index) => {
@@ -2886,7 +2961,7 @@
         }).reverse().join('');
 
       // Render claimed items
-      const userClaimed = claimedItems.filter(c => c.userId === currentUser);
+      const userClaimed = claimedItems.filter(c => c.userId === viewUser);
       const claimedHtml = userClaimed.length === 0
         ? '<div style="padding: 12px; text-align: center; color: var(--text-secondary); font-size: 13px;">No claimed items yet</div>'
         : userClaimed.map((claimed, index) => {
@@ -3057,6 +3132,8 @@
       }
 
       loadData();
+      // Initialize shop view to current user
+      shopViewUser = currentUser;
       updateUserHeaders();
       renderAll();
     }
