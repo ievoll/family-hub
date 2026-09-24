@@ -2515,11 +2515,13 @@
 
         let foundUncompleted = false;
         series.forEach(task => {
-          if (!foundUncompleted && !task.completed) {
-            // This is the next uncompleted one - keep it
+          if (task.completed) {
+            // Keep all completed tasks - show the history
+          } else if (!foundUncompleted) {
+            // This is the first uncompleted task - keep it
             foundUncompleted = true;
           } else {
-            // Either already found uncompleted, or this one is completed - remove it
+            // This is an uncompleted task after we found one - remove it
             tasksToRemove.add(task.id);
           }
         });
@@ -2617,11 +2619,13 @@
 
           let foundUncompleted = false;
           series.forEach(task => {
-            if (!foundUncompleted && !task.completed) {
-              // This is the next uncompleted one - keep it
+            if (task.completed) {
+              // Keep all completed tasks - show the history
+            } else if (!foundUncompleted) {
+              // This is the first uncompleted task - keep it
               foundUncompleted = true;
             } else {
-              // Either already found uncompleted, or this one is completed - remove it
+              // This is an uncompleted task after we found one - remove it
               tasksToRemove.add(task.id);
             }
           });
