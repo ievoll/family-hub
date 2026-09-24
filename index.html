@@ -1667,8 +1667,16 @@
       // Clean up tasks: convert undefined values (Firebase doesn't allow undefined)
       const cleanTasks = tasks.map(task => {
         const cleanTask = { ...task };
-        if (cleanTask.endDate === undefined) cleanTask.endDate = cleanTask.dueDate;
-        if (cleanTask.duration === undefined) cleanTask.duration = null;
+        // Convert all undefined values to null for Firebase compatibility
+        Object.keys(cleanTask).forEach(key => {
+          if (cleanTask[key] === undefined) {
+            if (key === 'endDate') {
+              cleanTask[key] = cleanTask.dueDate;
+            } else {
+              cleanTask[key] = null;
+            }
+          }
+        });
         return cleanTask;
       });
 
@@ -2183,7 +2191,7 @@
             recurPattern: task.recurPattern,
             maxOccurrences: task.maxOccurrences,
             occurrenceNumber: currentOccurrence + 1,
-            remind: task.remind,
+            remind: task.remind || null,
             completed: false,
             type: task.type,
             createdAt: new Date().toISOString()
