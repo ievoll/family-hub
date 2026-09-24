@@ -2624,15 +2624,14 @@
                 <div class="item-meta">
                   <span class="item-badge category-badge ${task.category}">${categories[task.category]}</span>
                   ${task.type !== 'event' && task.size ? `<span class="item-badge wuzzabucks-badge" style="background-color: var(--size-${task.size}); color: #1c1917;">${sizes[task.size].label} (${sizes[task.size].wb} WB)</span>` : task.type === 'event' ? '<span class="item-badge" style="background-color: #9ca3af; color: white;">Event</span>' : ''}
-                  📅 ${task.endDate ? task.dueDate + ' - ' + task.endDate : task.dueDate}${task.duration ? ` • ${task.duration}h` : ''}
+                  📅 ${task.dueDate === task.endDate ? task.dueDate : (task.endDate ? task.dueDate + ' - ' + task.endDate : task.dueDate)}${task.duration ? ` • ${task.duration}h` : ''}
                   ${task.recurPattern !== 'once' ? `• ${task.recurPattern}` : ''}
                   ${isOverdue ? '<span class="item-badge badge-overdue">OVERDUE</span>' : ''}
                   ${isDueSoon && !task.completed && task.type !== 'event' ? '<span class="item-badge badge-due-soon">DUE SOON</span>' : ''}
                 </div>
               </div>
               <div class="item-actions">
-                ${!task.archived && isAdmin() ? `<button class="btn-small btn-edit" onclick="openEditModal(${task.id})">Edit</button>` : ''}
-                ${task.archived ? `<button class="btn-small btn-delete" onclick="unarchiveTask(${task.id})">Unarchive</button>` : `<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Delete</button>`}
+                ${task.archived ? `<button class="btn-small btn-delete" onclick="unarchiveTask(${task.id})">Unarchive</button>` : (task.completed ? `<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Archive</button>` : `${isAdmin() ? `<button class="btn-small btn-edit" onclick="openEditModal(${task.id})">Edit</button>` : ''}<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Delete</button>`)}
               </div>
             </div>
           `;
@@ -2736,14 +2735,13 @@
                   <div class="item-meta">
                     <span class="item-badge category-badge ${task.category}">${categories[task.category]}</span>
                     ${task.type !== 'event' && task.size ? `<span class="item-badge wuzzabucks-badge" style="background-color: var(--size-${task.size}); color: #1c1917;">${sizes[task.size].label} (${sizes[task.size].wb} WB)</span>` : task.type === 'event' ? '<span class="item-badge" style="background-color: #9ca3af; color: white;">Event</span>' : ''}
-                    📅 ${task.endDate ? task.dueDate + ' - ' + task.endDate : task.dueDate}${task.duration ? ` • ${task.duration}h` : ''}
+                    📅 ${task.dueDate === task.endDate ? task.dueDate : (task.endDate ? task.dueDate + ' - ' + task.endDate : task.dueDate)}${task.duration ? ` • ${task.duration}h` : ''}
                     ${task.recurPattern !== 'once' ? `• ${task.recurPattern}` : ''}
                     ${isOverdue ? '<span class="item-badge badge-overdue">OVERDUE</span>' : ''}
                   </div>
                 </div>
                 <div class="item-actions">
-                  ${!task.archived ? `<button class="btn-small btn-edit" onclick="openEditModal(${task.id})">Edit</button>` : ''}
-                  ${task.archived ? `<button class="btn-small btn-delete" onclick="unarchiveTask(${task.id})">Unarchive</button>` : `<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Delete</button>`}
+                  ${task.archived ? `<button class="btn-small btn-delete" onclick="unarchiveTask(${task.id})">Unarchive</button>` : (task.completed ? `<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Archive</button>` : `<button class="btn-small btn-edit" onclick="openEditModal(${task.id})">Edit</button><button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Delete</button>`)}
                 </div>
               </div>
             `;
