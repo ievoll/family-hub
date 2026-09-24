@@ -1177,7 +1177,7 @@
                 <option value="rhino">🦏 Rhino (50 WB)</option>
                 <option value="elephant">🐘 Elephant (100 WB)</option>
               </select>
-              <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Start Date</label>
+              <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px;">Start Date / Due Date</label>
               <input type="date" id="task-due-date" placeholder="Start date" style="background: var(--bg-primary); color: var(--text-primary);">
               <div style="display: flex; gap: 8px; align-items: center;">
                 <span style="font-size: 12px; color: var(--text-secondary);">Start Time (optional):</span>
@@ -1664,8 +1664,16 @@
     }
 
     function saveData() {
+      // Clean up tasks: convert undefined values (Firebase doesn't allow undefined)
+      const cleanTasks = tasks.map(task => {
+        const cleanTask = { ...task };
+        if (cleanTask.endDate === undefined) cleanTask.endDate = cleanTask.dueDate;
+        if (cleanTask.duration === undefined) cleanTask.duration = null;
+        return cleanTask;
+      });
+
       const data = {
-        tasks: tasks,
+        tasks: cleanTasks,
         shopSpending: shopSpending,
         earnedWBPerUser: earnedWBPerUser,
         purchaseHistory: purchaseHistory,
@@ -1928,8 +1936,8 @@
 
       // Format due date with time if provided
       const formattedDueDate = dueDate + (dueHour || dueMinute ? ` ${String(dueHour || '00').padStart(2, '0')}:${String(dueMinute || '00').padStart(2, '0')}` : '');
-      // End date is just the date, no time component
-      const formattedEndDate = endDate || null;
+      // End date defaults to same as start date if not provided
+      const formattedEndDate = endDate || dueDate;
 
       // Get multiple assignments from checkboxes
       const checkedBoxes = Array.from(document.querySelectorAll('.task-assign-checkbox:checked'));
@@ -2042,6 +2050,7 @@
         category,
         size,
         dueDate,
+        endDate: dueDate,
         assignedTo,
         assignedBy: currentUser,
         recurPattern: recur,
@@ -2167,8 +2176,8 @@
             category: task.category,
             size: task.size,
             dueDate: nextDate,
-            endDate: task.endDate,
-            duration: task.duration,
+            endDate: task.endDate || nextDate,
+            duration: task.duration || null,
             assignedTo: task.assignedTo,
             assignedBy: task.assignedBy,
             recurPattern: task.recurPattern,
