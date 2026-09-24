@@ -1235,6 +1235,13 @@
               <div class="filter-label">Categories</div>
               <div class="category-filters" id="my-tasks-category-filters"></div>
             </div>
+            <div class="filter-group">
+              <div class="filter-label">Archive</div>
+              <div class="filter-buttons">
+                <button class="filter-btn active" onclick="toggleMyTasksArchiveFilter(false, this)">Show Active</button>
+                <button class="filter-btn" onclick="toggleMyTasksArchiveFilter(true, this)">Show Archived</button>
+              </div>
+            </div>
           </div>
 
           <div class="items-list" id="my-tasks-list"></div>
@@ -1269,6 +1276,13 @@
             <div class="filter-group">
               <div class="filter-label">Categories</div>
               <div class="category-filters" id="all-tasks-category-filters"></div>
+            </div>
+            <div class="filter-group">
+              <div class="filter-label">Archive</div>
+              <div class="filter-buttons">
+                <button class="filter-btn active" onclick="toggleAllTasksArchiveFilter(false, this)">Show Active</button>
+                <button class="filter-btn" onclick="toggleAllTasksArchiveFilter(true, this)">Show Archived</button>
+              </div>
             </div>
           </div>
 
@@ -1558,8 +1572,8 @@
 
     // Filter state
     let calendarFilters = { person: 'all', status: 'all', categories: new Set(Object.keys(categories)) };
-    let myTasksFilters = { status: 'all', categories: new Set(Object.keys(categories)) };
-    let allTasksFilters = { person: 'all', status: 'all', categories: new Set(Object.keys(categories)) };
+    let myTasksFilters = { status: 'all', categories: new Set(Object.keys(categories)), showArchived: false };
+    let allTasksFilters = { person: 'all', status: 'all', categories: new Set(Object.keys(categories)), showArchived: false };
     let leaderboardFilters = { dateRange: 'all-time' };
     let shopViewUser = 'ian'; // Track which user's shop is being viewed (for admin view)
     let calendarShowAll = false;
@@ -2204,9 +2218,34 @@
     }
 
     function deleteTask(id) {
-      tasks = tasks.filter(t => t.id !== id);
-      saveData();
-      renderAll();
+      const task = tasks.find(t => t.id === id);
+      if (task && task.completed) {
+        // Archive completed tasks instead of deleting
+        archiveTask(id);
+      } else {
+        // Only delete uncompleted tasks
+        tasks = tasks.filter(t => t.id !== id);
+        saveData();
+        renderAll();
+      }
+    }
+
+    function archiveTask(id) {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        task.archived = true;
+        saveData();
+        renderAll();
+      }
+    }
+
+    function unarchiveTask(id) {
+      const task = tasks.find(t => t.id === id);
+      if (task) {
+        task.archived = false;
+        saveData();
+        renderAll();
+      }
     }
 
     function updateCalendarFilter(filterType, value, btn) {
@@ -2294,6 +2333,20 @@
           allTasksFilters.categories.add(value);
         }
       }
+      renderAllTasks();
+    }
+
+    function toggleMyTasksArchiveFilter(showArchived, btn) {
+      myTasksFilters.showArchived = showArchived;
+      btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderMyTasks();
+    }
+
+    function toggleAllTasksArchiveFilter(showArchived, btn) {
+      allTasksFilters.showArchived = showArchived;
+      btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
       renderAllTasks();
     }
 
@@ -2506,6 +2559,15 @@
       // Apply category filter
       myTasks = myTasks.filter(t => myTasksFilters.categories.has(t.category));
 
+      // Apply archive filter
+      myTasks = myTasks.filter(t => {
+        if (myTasksFilters.showArchived) {
+          return t.archived; // Show only archived tasks
+        } else {
+          return !t.archived; // Show only non-archived tasks
+        }
+      });
+
       // For recurring tasks, show only the next uncompleted instance in each series
       const seriesMap = {};
       myTasks = myTasks.filter(t => {
@@ -2569,8 +2631,8 @@
                 </div>
               </div>
               <div class="item-actions">
-                ${isAdmin() ? `<button class="btn-small btn-edit" onclick="openEditModal(${task.id})">Edit</button>` : ''}
-                <button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Delete</button>
+                ${!task.archived && isAdmin() ? `<button class="btn-small btn-edit" onclick="openEditModal(${task.id})">Edit</button>` : ''}
+                ${task.archived ? `<button class="btn-small btn-delete" onclick="unarchiveTask(${task.id})">Unarchive</button>` : `<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Delete</button>`}
               </div>
             </div>
           `;
@@ -2609,6 +2671,15 @@
 
         // Apply category filter
         userTasks = userTasks.filter(t => allTasksFilters.categories.has(t.category));
+
+        // Apply archive filter
+        userTasks = userTasks.filter(t => {
+          if (allTasksFilters.showArchived) {
+            return t.archived; // Show only archived tasks
+          } else {
+            return !t.archived; // Show only non-archived tasks
+          }
+        });
 
         // For recurring tasks, show only the next uncompleted instance in each series
         const seriesMap = {};
@@ -2671,8 +2742,8 @@
                   </div>
                 </div>
                 <div class="item-actions">
-                  <button class="btn-small btn-edit" onclick="openEditModal(${task.id})">Edit</button>
-                  <button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Delete</button>
+                  ${!task.archived ? `<button class="btn-small btn-edit" onclick="openEditModal(${task.id})">Edit</button>` : ''}
+                  ${task.archived ? `<button class="btn-small btn-delete" onclick="unarchiveTask(${task.id})">Unarchive</button>` : `<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Delete</button>`}
                 </div>
               </div>
             `;
@@ -2705,6 +2776,7 @@
       // Calculate cutoff date based on filter
       const now = new Date();
       let cutoffDate = null;
+      const isAllTime = leaderboardFilters.dateRange === 'all-time';
       if (leaderboardFilters.dateRange === 'past-week') {
         cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
       } else if (leaderboardFilters.dateRange === 'past-month') {
@@ -2722,28 +2794,36 @@
         });
       });
 
-      tasks.forEach(task => {
-        // Only count tasks, not events
-        if (task.completed && task.type !== 'event') {
-          // Apply date range filter
-          if (cutoffDate && task.completedAt) {
-            const completedDate = new Date(task.completedAt);
-            if (completedDate < cutoffDate) {
-              return; // Skip this task
+      // For "all time", use earnedWBPerUser as the source of truth (persistent even if tasks are deleted)
+      if (isAllTime) {
+        Object.keys(users).forEach(userId => {
+          scores[userId].wb = earnedWBPerUser[userId] || 0;
+        });
+      } else {
+        // For date ranges, calculate from current tasks with date filtering
+        tasks.forEach(task => {
+          // Only count tasks, not events
+          if (task.completed && task.type !== 'event') {
+            // Apply date range filter
+            if (cutoffDate && task.completedAt) {
+              const completedDate = new Date(task.completedAt);
+              if (completedDate < cutoffDate) {
+                return; // Skip this task
+              }
             }
-          }
 
-          // Handle multiple assignments - give credit to all assignees
-          const assignees = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo];
-          assignees.forEach(assignee => {
-            if (scores[assignee]) {
-              scores[assignee].wb += sizes[task.size].wb;
-              scores[assignee].tasksCompleted++;
-              animalCounts[task.size][assignee]++;
-            }
-          });
-        }
-      });
+            // Handle multiple assignments - give credit to all assignees
+            const assignees = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo];
+            assignees.forEach(assignee => {
+              if (scores[assignee]) {
+                scores[assignee].wb += sizes[task.size].wb;
+                scores[assignee].tasksCompleted++;
+                animalCounts[task.size][assignee]++;
+              }
+            });
+          }
+        });
+      }
 
       const ranked = Object.entries(scores)
         .map(([userId, score]) => ({ userId, ...score }))
