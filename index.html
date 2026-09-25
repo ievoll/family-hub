@@ -1793,7 +1793,6 @@
       document.getElementById('calendar-header').textContent = isAdmin ? 'Calendar' : `${userName}'s Calendar`;
 
       // Hide filters for non-admins (Ivy and Angus can only see their own tasks)
-      const isAdmin = users[currentUser].role === 'admin';
       document.getElementById('calendar-person-filter').style.display = isAdmin ? 'block' : 'none';
       document.getElementById('calendar-categories-filter').style.display = isAdmin ? 'block' : 'none';
 
