@@ -2098,7 +2098,11 @@
 
     function openEditModal(id) {
       const task = tasks.find(t => t.id === id);
-      if (!task || !isAdmin()) return;
+      if (!task) return;
+
+      // Allow admins to edit any task, non-admins can only edit tasks assigned to them
+      const canEdit = isAdmin() || (Array.isArray(task.assignedTo) ? task.assignedTo.includes(currentUser) : task.assignedTo === currentUser);
+      if (!canEdit) return;
 
       editingTaskId = id;
       document.getElementById('edit-task-title').value = task.title;
@@ -2324,6 +2328,19 @@
         saveData();
         renderAll();
       }
+    }
+
+    function permanentlyDeleteTask(id) {
+      // Confirm deletion of archived task
+      if (!confirm('Are you sure you want to permanently delete this item? This cannot be undone.')) {
+        return;
+      }
+
+      // Remove the task completely
+      tasks = tasks.filter(t => t.id !== id);
+      saveData();
+      renderAll();
+      showTaskSuccess('✓ Item permanently deleted');
     }
 
     function updateCalendarFilter(filterType, value, btn) {
@@ -2719,7 +2736,7 @@
                 </div>
               </div>
               <div class="item-actions">
-                ${task.archived ? `<button class="btn-small btn-delete" onclick="unarchiveTask(${task.id})">Unarchive</button>` : (task.completed ? `<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Archive</button>` : `${isAdmin() ? `<button class="btn-small btn-edit" onclick="openEditModal(${task.id})">Edit</button>` : ''}<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Delete</button>`)}
+                ${task.archived ? `<button class="btn-small btn-edit" onclick="unarchiveTask(${task.id})">Unarchive</button><button class="btn-small btn-delete" onclick="permanentlyDeleteTask(${task.id})">Delete</button>` : (task.completed ? `<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Archive</button>` : `${(isAdmin() || (Array.isArray(task.assignedTo) ? task.assignedTo.includes('${currentUser}') : task.assignedTo === '${currentUser}')) ? `<button class="btn-small btn-edit" onclick="openEditModal(${task.id})">Edit</button>` : ''}<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Delete</button>`)}
               </div>
             </div>
           `;
@@ -2837,7 +2854,7 @@
                   </div>
                 </div>
                 <div class="item-actions">
-                  ${task.archived ? `<button class="btn-small btn-delete" onclick="unarchiveTask(${task.id})">Unarchive</button>` : (task.completed ? `<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Archive</button>` : `<button class="btn-small btn-edit" onclick="openEditModal(${task.id})">Edit</button><button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Delete</button>`)}
+                  ${task.archived ? `<button class="btn-small btn-edit" onclick="unarchiveTask(${task.id})">Unarchive</button><button class="btn-small btn-delete" onclick="permanentlyDeleteTask(${task.id})">Delete</button>` : (task.completed ? `<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Archive</button>` : `${(isAdmin() || (Array.isArray(task.assignedTo) ? task.assignedTo.includes('${currentUser}') : task.assignedTo === '${currentUser}')) ? `<button class="btn-small btn-edit" onclick="openEditModal(${task.id})">Edit</button>` : ''}<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Delete</button>`)}
                 </div>
               </div>
             `;
