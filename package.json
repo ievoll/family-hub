@@ -1,0 +1,21 @@
+{
+  "name": "family-hub",
+  "version": "1.0.0",
+  "description": "Family task management application with comprehensive unit tests",
+  "main": "index.html",
+  "scripts": {
+    "test": "node tests/test-suite.js",
+    "test:watch": "nodemon tests/test-suite.js"
+  },
+  "keywords": [
+    "family",
+    "tasks",
+    "management",
+    "test"
+  ],
+  "author": "Ian Vollrath",
+  "license": "MIT",
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
