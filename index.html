@@ -372,7 +372,8 @@
       flex-direction: column;
       gap: 16px;
       flex: 1;
-      overflow: hidden;
+      overflow: visible;
+      min-height: 0;
     }
 
     .calendar-nav {
@@ -394,8 +395,8 @@
       background: var(--border);
       border: 1px solid var(--border);
       border-radius: 8px;
-      overflow: hidden;
-      flex: 1;
+      overflow: visible;
+      flex: 0 1 auto;
     }
 
     .calendar-day-header {
@@ -416,6 +417,7 @@
       transition: background 0.2s;
       display: flex;
       flex-direction: column;
+      overflow: visible;
     }
 
     .calendar-day:hover {
@@ -437,8 +439,8 @@
       display: flex;
       flex-direction: column;
       gap: 2px;
-      flex: 1;
-      overflow: hidden;
+      flex: 0 1 auto;
+      overflow: visible;
     }
 
     .calendar-task {
@@ -1171,7 +1173,8 @@
               </select>
               <select id="task-size" class="task-only-field">
                 <option value="">Task size...</option>
-                <option value="ant">🐜 Ant (5 WB)</option>
+                <option value="ant">🐜 Ant (0 WB)</option>
+                <option value="sparrow">🐦 Sparrow (5 WB)</option>
                 <option value="beaver">🦫 Beaver (10 WB)</option>
                 <option value="deer">🦌 Deer (25 WB)</option>
                 <option value="rhino">🦏 Rhino (50 WB)</option>
@@ -1198,12 +1201,6 @@
                 <option value="monthly">Monthly</option>
               </select>
               <input type="number" id="task-occurrences" placeholder="Number of occurrences" min="1" style="display: none;">
-              <select id="task-remind">
-                <option value="">No reminder</option>
-                <option value="1">1 day before</option>
-                <option value="3">3 days before</option>
-                <option value="7">1 week before</option>
-              </select>
               <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
                 <input type="checkbox" id="task-completed" style="width: 16px; height: 16px; cursor: pointer;">
                 Mark as completed
@@ -1415,7 +1412,8 @@
         <div>
           <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Size</label>
           <select id="edit-task-size" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
-            <option value="ant">🐜 Ant (5 WB)</option>
+            <option value="ant">🐜 Ant (0 WB)</option>
+            <option value="sparrow">🐦 Sparrow (5 WB)</option>
             <option value="beaver">🦫 Beaver (10 WB)</option>
             <option value="deer">🦌 Deer (25 WB)</option>
             <option value="rhino">🦏 Rhino (50 WB)</option>
@@ -1541,7 +1539,8 @@
     };
 
     const sizes = {
-      ant: { label: '🐜 Ant', wb: 5 },
+      ant: { label: '🐜 Ant', wb: 0 },
+      sparrow: { label: '🐦 Sparrow', wb: 5 },
       beaver: { label: '🦫 Beaver', wb: 10 },
       deer: { label: '🦌 Deer', wb: 25 },
       rhino: { label: '🦏 Rhino', wb: 50 },
@@ -1954,7 +1953,6 @@
       const durationMinute = document.getElementById('task-duration-minute').value;
       const endDate = document.getElementById('task-end-date').value || null;
       const recur = document.getElementById('task-recur').value;
-      const remind = document.getElementById('task-remind').value || null;
       const completed = document.getElementById('task-completed').checked;
       const occurrences = recur !== 'once' ? parseInt(document.getElementById('task-occurrences').value) : null;
 
@@ -2014,7 +2012,6 @@
         recurPattern: recur,
         maxOccurrences: occurrences,
         occurrenceNumber: 1,
-        remind,
         completed: itemType === 'task' ? completed : false,
         type: itemType,
         createdAt: new Date().toISOString()
@@ -2045,7 +2042,6 @@
       document.getElementById('task-end-date').value = '';
       document.getElementById('task-recur').value = 'once';
       document.getElementById('task-occurrences').value = '';
-      document.getElementById('task-remind').value = '';
       document.getElementById('task-completed').checked = false;
       document.querySelector('input[name="item-type"][value="task"]').checked = true;
       toggleItemType('task');
@@ -2063,7 +2059,6 @@
       const size = document.getElementById('admin-task-size').value;
       const dueDate = document.getElementById('admin-task-due-date').value;
       const recur = document.getElementById('admin-task-recur').value;
-      const remind = document.getElementById('admin-task-remind').value || null;
       const completed = document.getElementById('admin-task-completed').checked;
 
       if (!title || !assignedTo || !category || !size || !dueDate) return;
@@ -2078,7 +2073,6 @@
         assignedTo,
         assignedBy: currentUser,
         recurPattern: recur,
-        remind,
         completed: completed,
         createdAt: new Date().toISOString()
       });
@@ -2089,7 +2083,6 @@
       document.getElementById('admin-task-size').value = '';
       document.getElementById('admin-task-due-date').value = '';
       document.getElementById('admin-task-recur').value = 'once';
-      document.getElementById('admin-task-remind').value = '';
       document.getElementById('admin-task-completed').checked = false;
 
       saveData();
@@ -2236,7 +2229,6 @@
               recurPattern: task.recurPattern,
               maxOccurrences: task.maxOccurrences,
               occurrenceNumber: nextOccurrence,
-              remind: task.remind || null,
               completed: false,
               type: task.type,
               createdAt: new Date().toISOString()
@@ -2297,7 +2289,6 @@
               recurPattern: task.recurPattern,
               maxOccurrences: task.maxOccurrences,
               occurrenceNumber: currentOccurrence + 1,
-              remind: task.remind || null,
               completed: false,
               type: task.type,
               createdAt: new Date().toISOString()
