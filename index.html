@@ -39,7 +39,8 @@
       --cat-fitness: #ef4444;
 
       /* Task size colors */
-      --size-ant: #fbbf24;
+      --size-ant: #d1d5db;
+      --size-sparrow: #fbbf24;
       --size-beaver: #f97316;
       --size-deer: #3b82f6;
       --size-rhino: #6b7280;
@@ -1562,6 +1563,7 @@
     let earnedWBPerUser = {}; // { userName: totalEarnedWB } - tracks earned WB permanently
     let purchaseHistory = []; // Array of { userId, itemId, quantity, cost, date }
     let claimedItems = []; // Array of { userId, itemId, quantity, cost, date, claimedAt, id }
+    let deletedTaskStats = []; // Array of { completedAt, size, assignedTo, wb } - permanent record of deleted task stats
 
     // Initialize spending and earning tracking
     Object.keys(users).forEach(userId => {
@@ -1637,6 +1639,7 @@
           earnedWBPerUser = data.earnedWBPerUser || {};
           purchaseHistory = data.purchaseHistory || [];
           claimedItems = data.claimedItems || [];
+          deletedTaskStats = data.deletedTaskStats || [];
 
           // Ensure all users have spending and earning entries
           Object.keys(users).forEach(userId => {
@@ -1699,6 +1702,7 @@
         earnedWBPerUser: earnedWBPerUser,
         purchaseHistory: purchaseHistory,
         claimedItems: claimedItems,
+        deletedTaskStats: deletedTaskStats,
         lastUpdated: new Date().toISOString()
       };
       database.ref('familyHub').set(data).catch(error => {
@@ -2327,6 +2331,18 @@
         return;
       }
 
+      // Save stats before deleting (if it's a completed task)
+      const task = tasks.find(t => t.id === id);
+      if (task && task.completed && task.type !== 'event' && task.size && sizes[task.size]) {
+        // Record the deleted task's stats permanently
+        deletedTaskStats.push({
+          completedAt: task.completedAt || new Date().toISOString(),
+          size: task.size,
+          assignedTo: task.assignedTo,
+          wb: sizes[task.size].wb
+        });
+      }
+
       // Remove the task completely
       tasks = tasks.filter(t => t.id !== id);
       saveData();
@@ -2920,6 +2936,29 @@
         }
       });
 
+      // Also count from deleted task stats (these are permanently recorded)
+      deletedTaskStats.forEach(stat => {
+        if (stat.size && sizes[stat.size]) {
+          // Apply date range filter for non-all-time views
+          if (!isAllTime && cutoffDate && stat.completedAt) {
+            const completedDate = new Date(stat.completedAt);
+            if (completedDate < cutoffDate) {
+              return; // Skip this deleted task stat
+            }
+          }
+
+          // Handle multiple assignments - give credit to all assignees
+          const assignees = Array.isArray(stat.assignedTo) ? stat.assignedTo : [stat.assignedTo];
+          assignees.forEach(assignee => {
+            if (scores[assignee]) {
+              scores[assignee].wb += stat.wb;
+              scores[assignee].tasksCompleted++;
+              animalCounts[stat.size][assignee]++;
+            }
+          });
+        }
+      });
+
       // For "all time", ensure WB totals match earnedWBPerUser (use it as authoritative)
       if (isAllTime) {
         Object.keys(users).forEach(userId => {
@@ -2980,9 +3019,10 @@
           return `<td>${count}</td>`;
         }).join('');
 
+        const textColor = sizeKey === 'ant' ? 'color: #1c1917;' : 'color: white;';
         animalTable += `
-          <tr style="background-color: var(--size-${sizeKey}); color: white;">
-            <td><strong>${sizeInfo.label} [${sizeInfo.wb} WB]</strong></td>
+          <tr style="background-color: var(--size-${sizeKey}); ${textColor}">
+            <td><strong>${sizeInfo.label}<br>${sizeInfo.wb} WB</strong></td>
             ${cells}
             <td><strong>${rowTotal}</strong></td>
           </tr>`;
