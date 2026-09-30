@@ -771,11 +771,11 @@
     .filter-group {
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 4px;
     }
 
     .filter-label {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       color: var(--text-secondary);
       text-transform: uppercase;
@@ -811,17 +811,17 @@
 
     .category-filters {
       display: flex;
-      gap: 6px;
+      gap: 4px;
       flex-wrap: wrap;
     }
 
     .category-filter-btn {
-      padding: 4px 8px;
+      padding: 2px 6px;
       border: 1px solid var(--border);
       border-radius: 4px;
       background: var(--bg-tertiary);
       cursor: pointer;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 500;
       transition: all 0.2s;
     }
@@ -833,6 +833,19 @@
 
     .category-filter-btn.inactive {
       opacity: 0.4;
+    }
+
+    /* Dark mode: ensure category filter text is visible */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .category-filter-btn.career,
+      :root:not([data-theme="light"]) .category-filter-btn.books {
+        color: #fafaf9 !important;
+      }
+    }
+
+    :root[data-theme="dark"] .category-filter-btn.career,
+    :root[data-theme="dark"] .category-filter-btn.books {
+      color: #fafaf9 !important;
     }
 
     /* Shop layout: always stack vertically */
@@ -2519,7 +2532,7 @@
 
       container.innerHTML = Object.keys(categories).map(cat => {
         const isActive = calendarFilters.categories.has(cat);
-        return `<button class="category-filter-btn ${isActive ? 'active' : 'inactive'}"
+        return `<button class="category-filter-btn ${cat} ${isActive ? 'active' : 'inactive'}"
                   style="border-color: var(--cat-${cat}); color: var(--cat-${cat});"
                   onclick="handleCategoryClick('calendar', '${cat}', this, event)">${categories[cat]}</button>`;
       }).join('');
@@ -2531,7 +2544,7 @@
 
       container.innerHTML = Object.keys(categories).map(cat => {
         const isActive = filterObj.categories.has(cat);
-        return `<button class="category-filter-btn ${isActive ? 'active' : 'inactive'}"
+        return `<button class="category-filter-btn ${cat} ${isActive ? 'active' : 'inactive'}"
                   style="border-color: var(--cat-${cat}); color: var(--cat-${cat});"
                   onclick="handleCategoryClick('myTasks', '${cat}', this, event)">${categories[cat]}</button>`;
       }).join('');
@@ -2543,7 +2556,7 @@
 
       container.innerHTML = Object.keys(categories).map(cat => {
         const isActive = filterObj.categories.has(cat);
-        return `<button class="category-filter-btn ${isActive ? 'active' : 'inactive'}"
+        return `<button class="category-filter-btn ${cat} ${isActive ? 'active' : 'inactive'}"
                   style="border-color: var(--cat-${cat}); color: var(--cat-${cat});"
                   onclick="handleCategoryClick('allTasks', '${cat}', this, event)">${categories[cat]}</button>`;
       }).join('');
