@@ -1562,6 +1562,43 @@
     </div>
   </div>
 
+  <!-- Delete Task Confirmation Modal (single item) -->
+  <div class="modal" id="delete-task-confirmation-modal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">Delete Item?</div>
+      <p style="color: var(--text-secondary); margin-bottom: 16px;">Are you sure you want to delete this item? This cannot be undone.</p>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeDeleteConfirmationModal()">Cancel</button>
+        <button style="background: var(--red); color: white;" onclick="confirmDeleteTask()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Recurring Task Choice Modal -->
+  <div class="modal" id="delete-recurring-task-modal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">Delete Recurring Item</div>
+      <p style="color: var(--text-secondary); margin-bottom: 16px;">This is a recurring item. What would you like to do?</p>
+      <div class="modal-actions" style="flex-direction: column; gap: 8px;">
+        <button style="background: var(--blue); color: white;" onclick="proceedDeleteRecurringTaskOccurrence()">Delete This Occurrence</button>
+        <button style="background: var(--red); color: white;" onclick="proceedDeleteRecurringTaskSeries()">Delete Series</button>
+        <button class="btn-secondary" onclick="closeDeleteRecurringTaskModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Recurring Task Confirmation Modal -->
+  <div class="modal" id="delete-recurring-confirmation-modal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">Confirm Deletion</div>
+      <p id="recurring-delete-message" style="color: var(--text-secondary); margin-bottom: 16px;">Are you sure you want to delete this occurrence?</p>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeDeleteRecurringConfirmationModal()">Cancel</button>
+        <button style="background: var(--red); color: white;" onclick="confirmDeleteRecurringTask()">Delete</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
@@ -2399,6 +2436,96 @@
       }
     }
 
+    // Deletion confirmation system
+    let pendingDeleteTaskId = null;
+    let pendingDeleteType = null; // 'single', 'occurrence', or 'series'
+
+    function requestDeleteTask(id) {
+      const task = tasks.find(t => t.id === id);
+      if (!task || task.completed) return;
+
+      pendingDeleteTaskId = id;
+
+      // Check if it's a recurring task
+      const isRecurring = task.recurPattern && task.recurPattern !== 'once';
+
+      if (isRecurring) {
+        // Show choice modal for recurring tasks
+        document.getElementById('delete-recurring-task-modal').classList.add('active');
+      } else {
+        // Show confirmation modal for single tasks
+        document.getElementById('delete-task-confirmation-modal').classList.add('active');
+      }
+    }
+
+    function closeDeleteConfirmationModal() {
+      document.getElementById('delete-task-confirmation-modal').classList.remove('active');
+      pendingDeleteTaskId = null;
+    }
+
+    function closeDeleteRecurringTaskModal() {
+      document.getElementById('delete-recurring-task-modal').classList.remove('active');
+      pendingDeleteTaskId = null;
+    }
+
+    function closeDeleteRecurringConfirmationModal() {
+      document.getElementById('delete-recurring-confirmation-modal').classList.remove('active');
+      pendingDeleteTaskId = null;
+      pendingDeleteType = null;
+    }
+
+    function proceedDeleteRecurringTaskOccurrence() {
+      document.getElementById('delete-recurring-task-modal').classList.remove('active');
+      pendingDeleteType = 'occurrence';
+
+      // Show confirmation message for this occurrence
+      document.getElementById('recurring-delete-message').textContent =
+        'Are you sure you want to delete this occurrence? This cannot be undone.';
+      document.getElementById('delete-recurring-confirmation-modal').classList.add('active');
+    }
+
+    function proceedDeleteRecurringTaskSeries() {
+      document.getElementById('delete-recurring-task-modal').classList.remove('active');
+      pendingDeleteType = 'series';
+
+      // Show confirmation message for series
+      document.getElementById('recurring-delete-message').textContent =
+        'Are you sure you want to delete the entire series? All occurrences will be deleted. This cannot be undone.';
+      document.getElementById('delete-recurring-confirmation-modal').classList.add('active');
+    }
+
+    function confirmDeleteTask() {
+      if (pendingDeleteTaskId) {
+        deleteTask(pendingDeleteTaskId);
+        closeDeleteConfirmationModal();
+      }
+    }
+
+    function confirmDeleteRecurringTask() {
+      if (pendingDeleteTaskId && pendingDeleteType) {
+        const task = tasks.find(t => t.id === pendingDeleteTaskId);
+        if (!task) return;
+
+        if (pendingDeleteType === 'series') {
+          // Delete entire series - find all tasks with same title/assignedBy/recurPattern/maxOccurrences
+          const maxOccurrences = task.maxOccurrences || Infinity;
+          tasks = tasks.filter(t =>
+            !(t.title === task.title &&
+              t.assignedBy === task.assignedBy &&
+              t.recurPattern === task.recurPattern &&
+              (t.maxOccurrences || Infinity) === maxOccurrences)
+          );
+        } else if (pendingDeleteType === 'occurrence') {
+          // Delete just this occurrence (same as regular deleteTask)
+          deleteTask(pendingDeleteTaskId);
+        }
+
+        saveData();
+        renderAll();
+        closeDeleteRecurringConfirmationModal();
+      }
+    }
+
     function permanentlyDeleteTask(id) {
       // Confirm deletion of archived task
       if (!confirm('Are you sure you want to permanently delete this item? This cannot be undone.')) {
@@ -2817,7 +2944,7 @@
                 </div>
               </div>
               <div class="item-actions">
-                ${task.archived ? `<button class="btn-small btn-edit" onclick="unarchiveTask(${task.id})">Unarchive</button><button class="btn-small btn-delete" onclick="permanentlyDeleteTask(${task.id})">Delete</button>` : (task.completed ? `<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Archive</button>` : `${(isAdmin() || (Array.isArray(task.assignedTo) ? task.assignedTo.includes('${currentUser}') : task.assignedTo === '${currentUser}')) ? `<button class="btn-small btn-edit" onclick="openEditModal(${task.id})">Edit</button>` : ''}<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Delete</button>`)}
+                ${task.archived ? `<button class="btn-small btn-edit" onclick="unarchiveTask(${task.id})">Unarchive</button><button class="btn-small btn-delete" onclick="permanentlyDeleteTask(${task.id})">Delete</button>` : (task.completed ? `<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Archive</button>` : `${(isAdmin() || (Array.isArray(task.assignedTo) ? task.assignedTo.includes('${currentUser}') : task.assignedTo === '${currentUser}')) ? `<button class="btn-small btn-edit" onclick="openEditModal(${task.id})">Edit</button>` : ''}<button class="btn-small btn-delete" onclick="requestDeleteTask(${task.id})">Delete</button>`)}
               </div>
             </div>
           `;
@@ -2935,7 +3062,7 @@
                   </div>
                 </div>
                 <div class="item-actions">
-                  ${task.archived ? `<button class="btn-small btn-edit" onclick="unarchiveTask(${task.id})">Unarchive</button><button class="btn-small btn-delete" onclick="permanentlyDeleteTask(${task.id})">Delete</button>` : (task.completed ? `<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Archive</button>` : `${(isAdmin() || (Array.isArray(task.assignedTo) ? task.assignedTo.includes('${currentUser}') : task.assignedTo === '${currentUser}')) ? `<button class="btn-small btn-edit" onclick="openEditModal(${task.id})">Edit</button>` : ''}<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Delete</button>`)}
+                  ${task.archived ? `<button class="btn-small btn-edit" onclick="unarchiveTask(${task.id})">Unarchive</button><button class="btn-small btn-delete" onclick="permanentlyDeleteTask(${task.id})">Delete</button>` : (task.completed ? `<button class="btn-small btn-delete" onclick="deleteTask(${task.id})">Archive</button>` : `${(isAdmin() || (Array.isArray(task.assignedTo) ? task.assignedTo.includes('${currentUser}') : task.assignedTo === '${currentUser}')) ? `<button class="btn-small btn-edit" onclick="openEditModal(${task.id})">Edit</button>` : ''}<button class="btn-small btn-delete" onclick="requestDeleteTask(${task.id})">Delete</button>`)}
                 </div>
               </div>
             `;
