@@ -441,7 +441,8 @@
       flex-direction: column;
       gap: 2px;
       flex: 0 1 auto;
-      overflow: visible;
+      overflow: hidden;
+      max-height: 80px;
     }
 
     .calendar-task {
@@ -981,6 +982,24 @@
         font-size: 8px;
         padding: 1px 2px;
       }
+
+      /* Compact assign-to checkboxes for narrow mobile */
+      .task-assign-grid {
+        gap: 4px;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+      }
+
+      .task-assign-grid label {
+        gap: 2px;
+        font-size: 11px;
+        flex: 0 1 auto;
+      }
+
+      .task-assign-grid input[type="checkbox"] {
+        width: 14px !important;
+        height: 14px !important;
+      }
     }
 
     @media (max-width: 360px) {
@@ -1023,6 +1042,24 @@
       .calendar-task {
         font-size: 7px;
         padding: 1px;
+      }
+
+      /* Ultra-compact assign-to checkboxes for ultra-narrow mobile */
+      .task-assign-grid {
+        gap: 2px;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+      }
+
+      .task-assign-grid label {
+        gap: 1px;
+        font-size: 10px;
+        flex: 0 1 auto;
+      }
+
+      .task-assign-grid input[type="checkbox"] {
+        width: 12px !important;
+        height: 12px !important;
       }
     }
 
