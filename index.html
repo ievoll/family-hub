@@ -870,6 +870,9 @@
         flex-direction: column;
       }
 
+      .main {
+        padding: 16px;
+      }
 
       .sidebar {
         width: 100%;
@@ -915,6 +918,10 @@
         grid-template-columns: 1fr !important;
       }
 
+      .main {
+        padding: 12px;
+      }
+
       .nav-item {
         font-size: 12px !important;
         padding: 4px 4px !important;
@@ -935,10 +942,40 @@
         padding: 8px 10px !important;
         font-size: 12px !important;
       }
+
+      /* Calendar optimization for narrow mobile */
+      .calendar-grid {
+        gap: 0px;
+        min-height: auto;
+      }
+
+      .calendar-day {
+        min-height: 45px;
+        padding: 4px;
+      }
+
+      .calendar-day-header {
+        padding: 4px;
+        font-size: 10px;
+      }
+
+      .calendar-day-number {
+        font-size: 10px;
+        margin-bottom: 2px;
+      }
+
+      .calendar-task {
+        font-size: 8px;
+        padding: 1px 2px;
+      }
     }
 
     @media (max-width: 360px) {
       /* Very narrow mobile */
+      .main {
+        padding: 8px;
+      }
+
       .nav-item {
         font-size: 11px !important;
         padding: 3px 3px !important;
@@ -952,6 +989,27 @@
       .animal-breakdown-table td {
         padding: 6px 8px !important;
         font-size: 11px !important;
+      }
+
+      /* Calendar for ultra-narrow mobile */
+      .calendar-day {
+        min-height: 40px;
+        padding: 3px;
+      }
+
+      .calendar-day-header {
+        padding: 3px;
+        font-size: 9px;
+      }
+
+      .calendar-day-number {
+        font-size: 9px;
+        margin-bottom: 1px;
+      }
+
+      .calendar-task {
+        font-size: 7px;
+        padding: 1px;
       }
     }
 
