@@ -282,7 +282,7 @@
       align-items: center;
       gap: 6px;
       white-space: nowrap;
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 500;
     }
 
@@ -321,6 +321,21 @@
 
     button:hover {
       opacity: 0.9;
+    }
+
+    /* Notepad section specific styling */
+    #notepad {
+      overflow: visible;
+    }
+
+    #notepad-input {
+      width: 100%;
+    }
+
+    #notepad-list {
+      flex: 1;
+      overflow-y: auto;
+      min-height: 200px;
     }
 
     /* Modal */
@@ -987,6 +1002,11 @@
         font-size: 8px;
         padding: 1px 2px;
       }
+
+      .calendar-task-cat,
+      .calendar-task-time {
+        font-size: 8px;
+      }
     }
 
     @media (max-width: 360px) {
@@ -1029,6 +1049,11 @@
       .calendar-task {
         font-size: 7px;
         padding: 1px;
+      }
+
+      .calendar-task-cat,
+      .calendar-task-time {
+        font-size: 7px;
       }
     }
 
@@ -2953,7 +2978,7 @@
 
         // Apply type filter
         if (calendarFilters.type !== 'all') {
-          dayTasks = dayTasks.filter(t => t.itemType === calendarFilters.type);
+          dayTasks = dayTasks.filter(t => t.type === calendarFilters.type);
         }
 
         // Apply category filter
@@ -3015,7 +3040,7 @@
 
       // Apply type filter
       if (myTasksFilters.type !== 'all') {
-        myTasks = myTasks.filter(t => t.itemType === myTasksFilters.type);
+        myTasks = myTasks.filter(t => t.type === myTasksFilters.type);
       }
 
       // Apply category filter
@@ -3140,7 +3165,7 @@
 
         // Apply type filter
         if (allTasksFilters.type !== 'all') {
-          userTasks = userTasks.filter(t => t.itemType === allTasksFilters.type);
+          userTasks = userTasks.filter(t => t.type === allTasksFilters.type);
         }
 
         // Apply category filter
