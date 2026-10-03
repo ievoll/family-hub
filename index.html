@@ -282,7 +282,7 @@
       align-items: center;
       gap: 6px;
       white-space: nowrap;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 500;
     }
 
@@ -4005,8 +4005,13 @@
       const notesList = document.getElementById('notepad-list');
       notesList.innerHTML = '';
 
-      // Get notes for current user
-      const userNotes = Object.values(notes).filter(note => note.userId === currentUser);
+      // Get notes for current user and sort by most recent first
+      let userNotes = Object.values(notes).filter(note => note.userId === currentUser);
+      userNotes.sort((a, b) => {
+        const aDate = new Date(a.updatedAt || a.createdAt);
+        const bDate = new Date(b.updatedAt || b.createdAt);
+        return bDate - aDate; // Most recent first
+      });
 
       if (userNotes.length === 0) {
         notesList.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px; font-size: 13px;">No notes yet. Add one to get started!</p>';
