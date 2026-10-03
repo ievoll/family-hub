@@ -3017,11 +3017,11 @@
           dayTasks = dayTasks.filter(t => t.type === calendarFilters.type);
         }
 
-        // Apply status filter only to tasks (not events)
+        // Apply status filter only to tasks (events always show)
         if (calendarFilters.status === 'pending') {
-          dayTasks = dayTasks.filter(t => t.type !== 'event' && !t.completed);
+          dayTasks = dayTasks.filter(t => t.type === 'event' || !t.completed);
         } else if (calendarFilters.status === 'completed') {
-          dayTasks = dayTasks.filter(t => t.type !== 'event' && t.completed);
+          dayTasks = dayTasks.filter(t => t.type === 'event' || t.completed);
         }
 
         // Apply category filter
@@ -3079,11 +3079,11 @@
         myTasks = myTasks.filter(t => t.type === myTasksFilters.type);
       }
 
-      // Apply status filter only to tasks (not events)
+      // Apply status filter only to tasks (events always show)
       if (myTasksFilters.status === 'pending') {
-        myTasks = myTasks.filter(t => t.type !== 'event' && !t.completed);
+        myTasks = myTasks.filter(t => t.type === 'event' || !t.completed);
       } else if (myTasksFilters.status === 'completed') {
-        myTasks = myTasks.filter(t => t.type !== 'event' && t.completed);
+        myTasks = myTasks.filter(t => t.type === 'event' || t.completed);
       }
 
       // Apply category filter
@@ -3204,11 +3204,11 @@
           userTasks = userTasks.filter(t => t.type === allTasksFilters.type);
         }
 
-        // Apply status filter only to tasks (not events)
+        // Apply status filter only to tasks (events always show)
         if (allTasksFilters.status === 'pending') {
-          userTasks = userTasks.filter(t => t.type !== 'event' && !t.completed);
+          userTasks = userTasks.filter(t => t.type === 'event' || !t.completed);
         } else if (allTasksFilters.status === 'completed') {
-          userTasks = userTasks.filter(t => t.type !== 'event' && t.completed);
+          userTasks = userTasks.filter(t => t.type === 'event' || t.completed);
         }
 
         // Apply category filter
