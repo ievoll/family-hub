@@ -323,19 +323,37 @@
       opacity: 0.9;
     }
 
-    /* Notepad section specific styling */
+    /* Notes section specific styling */
     #notepad {
       overflow: visible;
+      padding: 24px;
+    }
+
+    #notepad .header {
+      margin-bottom: 24px;
     }
 
     #notepad-input {
       width: 100%;
+      font-size: 14px !important;
+      padding: 10px !important;
+      border: 1px solid var(--border) !important;
+      border-radius: 6px !important;
+      background: var(--bg-primary) !important;
+      color: var(--text-primary) !important;
+    }
+
+    #notepad-input:focus {
+      outline: none;
+      border-color: var(--accent) !important;
+      box-shadow: 0 0 0 2px rgba(21, 128, 61, 0.1) !important;
     }
 
     #notepad-list {
       flex: 1;
       overflow-y: auto;
       min-height: 200px;
+      margin-top: 16px;
     }
 
     /* Modal */
@@ -1248,7 +1266,7 @@
       <div class="user-selector">
         <div style="font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; padding: 0 12px;">
           <span>Logged in as:</span>
-          <strong id="logged-in-user" style="color: var(--accent); cursor: pointer;" onclick="openNotepadIfAllowed()">—</strong>
+          <strong id="logged-in-user" style="color: var(--accent);">—</strong>
         </div>
         <button onclick="logout()" style="padding: 8px 12px; border-radius: 6px; border: 2px solid transparent; background: var(--bg-tertiary); color: var(--text-secondary); cursor: pointer; font-weight: 500; font-size: 13px; transition: all 0.2s;">🔒 Logout</button>
       </div>
@@ -1261,8 +1279,8 @@
           <div class="nav-item" data-section="create-task">➕ Create</div>
           <div class="nav-item active" data-section="calendar">📅 Calendar</div>
           <div class="nav-item" data-section="my-tasks">✓ Items</div>
+          <div class="nav-item" id="notepad-nav-item" data-section="notepad" style="display: none;">📝 Notes</div>
           <div class="nav-item" data-section="shop">🛒 Shop</div>
-          <div class="nav-item" id="notepad-nav-item" data-section="notepad" style="display: none;">📝 Notepad</div>
         </div>
       </div>
 
@@ -1282,6 +1300,24 @@
             </div>
 
             <div class="filter-bar" id="calendar-filter-bar">
+              <div style="display: flex; gap: 16px;">
+                <div class="filter-group">
+                  <div class="filter-label">Type</div>
+                  <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="type" data-value="all" onclick="updateCalendarFilter('type', 'all', this)">All</button>
+                    <button class="filter-btn" data-filter="type" data-value="task" onclick="updateCalendarFilter('type', 'task', this)">Tasks</button>
+                    <button class="filter-btn" data-filter="type" data-value="event" onclick="updateCalendarFilter('type', 'event', this)">Events</button>
+                  </div>
+                </div>
+                <div class="filter-group" id="calendar-task-status-filter">
+                  <div class="filter-label">Task Status</div>
+                  <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="status" data-value="all" onclick="updateCalendarFilter('status', 'all', this)">All</button>
+                    <button class="filter-btn" data-filter="status" data-value="pending" onclick="updateCalendarFilter('status', 'pending', this)">Pending</button>
+                    <button class="filter-btn" data-filter="status" data-value="completed" onclick="updateCalendarFilter('status', 'completed', this)">Completed</button>
+                  </div>
+                </div>
+              </div>
               <div class="filter-group" id="calendar-person-filter">
                 <div class="filter-label">Person</div>
                 <div class="filter-buttons">
@@ -1290,22 +1326,6 @@
                   <button class="filter-btn" data-filter="person" data-value="cindy" onclick="updateCalendarFilter('person', 'cindy', this)">Cindy</button>
                   <button class="filter-btn" data-filter="person" data-value="ivy" onclick="updateCalendarFilter('person', 'ivy', this)">Ivy</button>
                   <button class="filter-btn" data-filter="person" data-value="angus" onclick="updateCalendarFilter('person', 'angus', this)">Angus</button>
-                </div>
-              </div>
-              <div class="filter-group">
-                <div class="filter-label">Status</div>
-                <div class="filter-buttons">
-                  <button class="filter-btn active" data-filter="status" data-value="all" onclick="updateCalendarFilter('status', 'all', this)">All</button>
-                  <button class="filter-btn" data-filter="status" data-value="pending" onclick="updateCalendarFilter('status', 'pending', this)">Pending</button>
-                  <button class="filter-btn" data-filter="status" data-value="completed" onclick="updateCalendarFilter('status', 'completed', this)">Completed</button>
-                </div>
-              </div>
-              <div class="filter-group">
-                <div class="filter-label">Type</div>
-                <div class="filter-buttons">
-                  <button class="filter-btn active" data-filter="type" data-value="all" onclick="updateCalendarFilter('type', 'all', this)">All</button>
-                  <button class="filter-btn" data-filter="type" data-value="task" onclick="updateCalendarFilter('type', 'task', this)">Tasks</button>
-                  <button class="filter-btn" data-filter="type" data-value="event" onclick="updateCalendarFilter('type', 'event', this)">Events</button>
                 </div>
               </div>
               <div class="filter-group" id="calendar-categories-filter">
@@ -1414,20 +1434,22 @@
           </div>
 
           <div class="filter-bar">
-            <div class="filter-group">
-              <div class="filter-label">Status</div>
-              <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="status" data-value="all" onclick="updateMyTasksFilter('status', 'all', this)">All</button>
-                <button class="filter-btn" data-filter="status" data-value="pending" onclick="updateMyTasksFilter('status', 'pending', this)">Pending</button>
-                <button class="filter-btn" data-filter="status" data-value="completed" onclick="updateMyTasksFilter('status', 'completed', this)">Completed</button>
+            <div style="display: flex; gap: 16px;">
+              <div class="filter-group">
+                <div class="filter-label">Type</div>
+                <div class="filter-buttons">
+                  <button class="filter-btn active" data-filter="type" data-value="all" onclick="updateMyTasksFilter('type', 'all', this)">All</button>
+                  <button class="filter-btn" data-filter="type" data-value="task" onclick="updateMyTasksFilter('type', 'task', this)">Tasks</button>
+                  <button class="filter-btn" data-filter="type" data-value="event" onclick="updateMyTasksFilter('type', 'event', this)">Events</button>
+                </div>
               </div>
-            </div>
-            <div class="filter-group">
-              <div class="filter-label">Type</div>
-              <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="type" data-value="all" onclick="updateMyTasksFilter('type', 'all', this)">All</button>
-                <button class="filter-btn" data-filter="type" data-value="task" onclick="updateMyTasksFilter('type', 'task', this)">Tasks</button>
-                <button class="filter-btn" data-filter="type" data-value="event" onclick="updateMyTasksFilter('type', 'event', this)">Events</button>
+              <div class="filter-group" id="my-tasks-task-status-filter">
+                <div class="filter-label">Task Status</div>
+                <div class="filter-buttons">
+                  <button class="filter-btn active" data-filter="status" data-value="all" onclick="updateMyTasksFilter('status', 'all', this)">All</button>
+                  <button class="filter-btn" data-filter="status" data-value="pending" onclick="updateMyTasksFilter('status', 'pending', this)">Pending</button>
+                  <button class="filter-btn" data-filter="status" data-value="completed" onclick="updateMyTasksFilter('status', 'completed', this)">Completed</button>
+                </div>
               </div>
             </div>
             <div class="filter-group">
@@ -1454,6 +1476,24 @@
           </div>
 
           <div class="filter-bar">
+            <div style="display: flex; gap: 16px;">
+              <div class="filter-group">
+                <div class="filter-label">Type</div>
+                <div class="filter-buttons">
+                  <button class="filter-btn active" data-filter="type" data-value="all" onclick="updateAllTasksFilter('type', 'all', this)">All</button>
+                  <button class="filter-btn" data-filter="type" data-value="task" onclick="updateAllTasksFilter('type', 'task', this)">Tasks</button>
+                  <button class="filter-btn" data-filter="type" data-value="event" onclick="updateAllTasksFilter('type', 'event', this)">Events</button>
+                </div>
+              </div>
+              <div class="filter-group" id="all-tasks-task-status-filter">
+                <div class="filter-label">Task Status</div>
+                <div class="filter-buttons">
+                  <button class="filter-btn active" data-filter="status" data-value="all" onclick="updateAllTasksFilter('status', 'all', this)">All</button>
+                  <button class="filter-btn" data-filter="status" data-value="pending" onclick="updateAllTasksFilter('status', 'pending', this)">Pending</button>
+                  <button class="filter-btn" data-filter="status" data-value="completed" onclick="updateAllTasksFilter('status', 'completed', this)">Completed</button>
+                </div>
+              </div>
+            </div>
             <div class="filter-group">
               <div class="filter-label">Person</div>
               <div class="filter-buttons">
@@ -1462,14 +1502,6 @@
                 <button class="filter-btn" data-filter="person" data-value="cindy" onclick="updateAllTasksPersonFilter('cindy', this)">Cindy</button>
                 <button class="filter-btn" data-filter="person" data-value="ivy" onclick="updateAllTasksPersonFilter('ivy', this)">Ivy</button>
                 <button class="filter-btn" data-filter="person" data-value="angus" onclick="updateAllTasksPersonFilter('angus', this)">Angus</button>
-              </div>
-            </div>
-            <div class="filter-group">
-              <div class="filter-label">Status</div>
-              <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="status" data-value="all" onclick="updateAllTasksFilter('status', 'all', this)">All</button>
-                <button class="filter-btn" data-filter="status" data-value="pending" onclick="updateAllTasksFilter('status', 'pending', this)">Pending</button>
-                <button class="filter-btn" data-filter="status" data-value="completed" onclick="updateAllTasksFilter('status', 'completed', this)">Completed</button>
               </div>
             </div>
             <div class="filter-group">
@@ -1578,15 +1610,15 @@
           </div>
         </section>
 
-        <!-- Notepad -->
-        <section id="notepad" class="section" style="display: none;">
+        <!-- Notes -->
+        <section id="notepad" class="section">
           <div class="header">
-            <h2>📝 Notepad</h2>
+            <h2>📝 Notes</h2>
             <p>Personal notes and reminders</p>
           </div>
 
           <div style="display: flex; gap: 12px; margin-bottom: 20px;">
-            <input type="text" id="notepad-input" placeholder="Add a new note..." style="flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
+            <input type="text" id="notepad-input" placeholder="Add a new note..." style="flex: 1;">
             <button onclick="addNote()" style="background: var(--accent); color: white; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Add Note</button>
           </div>
 
@@ -3825,9 +3857,9 @@
 
     // Notepad Functions
     function openNotepadIfAllowed() {
-      // Only Ian and Cindy can access notepad
+      // Only Ian and Cindy can access notes
       if (currentUser !== 'ian' && currentUser !== 'cindy') {
-        showTaskError('Only Ian and Cindy can access the Notepad');
+        showTaskError('Only Ian and Cindy can access Notes');
         return;
       }
 
@@ -3847,6 +3879,14 @@
 
       // Render the notes
       renderNotes();
+
+      // Focus the input field after a brief delay to ensure rendering
+      setTimeout(() => {
+        const input = document.getElementById('notepad-input');
+        if (input) {
+          input.focus();
+        }
+      }, 50);
     }
 
     function addNote() {
