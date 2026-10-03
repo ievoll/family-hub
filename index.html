@@ -486,9 +486,8 @@
       padding: 2px 4px;
       border-radius: 3px;
       font-size: 10px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      white-space: normal;
+      overflow: visible;
       font-weight: 500;
       line-height: 1.2;
     }
@@ -1413,7 +1412,7 @@
               <div style="display: flex; gap: 8px; align-items: center;">
                 <span style="font-size: 12px; color: var(--text-secondary);">Duration (optional):</span>
                 <input type="number" id="task-duration-hour" placeholder="Hours" min="0" max="23" style="flex: 0 0 60px; width: 60px;">
-                <input type="number" id="task-duration-minute" placeholder="Mins" min="0" max="59" style="flex: 0 0 60px; width: 60px;">
+                <input type="number" id="task-duration-minute" placeholder="Min" min="0" max="59" style="flex: 0 0 60px; width: 60px;">
               </div>
               <label style="font-size: 12px; color: var(--text-secondary); display: block; margin-bottom: 4px;">End Date (optional)</label>
               <input type="date" id="task-end-date" placeholder="End date (optional)" style="background: var(--bg-primary); color: var(--text-primary);">
@@ -1425,7 +1424,7 @@
                 <option value="monthly">Monthly</option>
               </select>
               <input type="number" id="task-occurrences" placeholder="Number of occurrences" min="1" style="display: none;">
-              <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
+              <label style="display: none; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
                 <input type="checkbox" id="task-completed" style="width: 16px; height: 16px; cursor: pointer;">
                 Mark as completed
               </label>
@@ -3086,6 +3085,15 @@
         myTasks = myTasks.filter(t => t.type === 'event' || t.completed);
       }
 
+      // Hide past events from items page (but keep past tasks)
+      myTasks = myTasks.filter(t => {
+        if (t.type === 'event' && t.dueDate) {
+          const eventDate = t.dueDate.split(' ')[0]; // Get just the date part
+          return eventDate >= TODAY;
+        }
+        return true; // Keep all tasks
+      });
+
       // Apply category filter
       myTasks = myTasks.filter(t => myTasksFilters.categories.has(t.category));
 
@@ -3210,6 +3218,15 @@
         } else if (allTasksFilters.status === 'completed') {
           userTasks = userTasks.filter(t => t.type === 'event' || t.completed);
         }
+
+        // Hide past events from items page (but keep past tasks)
+        userTasks = userTasks.filter(t => {
+          if (t.type === 'event' && t.dueDate) {
+            const eventDate = t.dueDate.split(' ')[0]; // Get just the date part
+            return eventDate >= TODAY;
+          }
+          return true; // Keep all tasks
+        });
 
         // Apply category filter
         userTasks = userTasks.filter(t => allTasksFilters.categories.has(t.category));
