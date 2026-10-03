@@ -282,7 +282,7 @@
       align-items: center;
       gap: 6px;
       white-space: nowrap;
-      font-size: 15px;
+      font-size: 13px;
       font-weight: 500;
     }
 
@@ -989,6 +989,16 @@
         font-size: 16px !important;
       }
 
+      /* Filter buttons on narrow mobile - reduce padding/font to prevent wrapping */
+      .filter-btn {
+        padding: 3px 6px !important;
+        font-size: 10px !important;
+      }
+
+      .filter-label {
+        font-size: 10px !important;
+      }
+
       .animal-breakdown-table th,
       .animal-breakdown-table td {
         padding: 8px 10px !important;
@@ -1300,6 +1310,16 @@
             </div>
 
             <div class="filter-bar" id="calendar-filter-bar">
+              <div class="filter-group" id="calendar-person-filter">
+                <div class="filter-label">Person</div>
+                <div class="filter-buttons">
+                  <button class="filter-btn active" data-filter="person" data-value="all" onclick="updateCalendarFilter('person', 'all', this)">All</button>
+                  <button class="filter-btn" data-filter="person" data-value="ian" onclick="updateCalendarFilter('person', 'ian', this)">Ian</button>
+                  <button class="filter-btn" data-filter="person" data-value="cindy" onclick="updateCalendarFilter('person', 'cindy', this)">Cindy</button>
+                  <button class="filter-btn" data-filter="person" data-value="ivy" onclick="updateCalendarFilter('person', 'ivy', this)">Ivy</button>
+                  <button class="filter-btn" data-filter="person" data-value="angus" onclick="updateCalendarFilter('person', 'angus', this)">Angus</button>
+                </div>
+              </div>
               <div style="display: flex; gap: 16px;">
                 <div class="filter-group">
                   <div class="filter-label">Type</div>
@@ -1316,16 +1336,6 @@
                     <button class="filter-btn" data-filter="status" data-value="pending" onclick="updateCalendarFilter('status', 'pending', this)">Pending</button>
                     <button class="filter-btn" data-filter="status" data-value="completed" onclick="updateCalendarFilter('status', 'completed', this)">Completed</button>
                   </div>
-                </div>
-              </div>
-              <div class="filter-group" id="calendar-person-filter">
-                <div class="filter-label">Person</div>
-                <div class="filter-buttons">
-                  <button class="filter-btn active" data-filter="person" data-value="all" onclick="updateCalendarFilter('person', 'all', this)">All</button>
-                  <button class="filter-btn" data-filter="person" data-value="ian" onclick="updateCalendarFilter('person', 'ian', this)">Ian</button>
-                  <button class="filter-btn" data-filter="person" data-value="cindy" onclick="updateCalendarFilter('person', 'cindy', this)">Cindy</button>
-                  <button class="filter-btn" data-filter="person" data-value="ivy" onclick="updateCalendarFilter('person', 'ivy', this)">Ivy</button>
-                  <button class="filter-btn" data-filter="person" data-value="angus" onclick="updateCalendarFilter('person', 'angus', this)">Angus</button>
                 </div>
               </div>
               <div class="filter-group" id="calendar-categories-filter">
@@ -3002,15 +3012,16 @@
         }
 
         // Apply status filter
-        if (calendarFilters.status === 'pending') {
-          dayTasks = dayTasks.filter(t => !t.completed);
-        } else if (calendarFilters.status === 'completed') {
-          dayTasks = dayTasks.filter(t => t.completed);
-        }
-
-        // Apply type filter
+        // Apply type filter first
         if (calendarFilters.type !== 'all') {
           dayTasks = dayTasks.filter(t => t.type === calendarFilters.type);
+        }
+
+        // Apply status filter only to tasks (not events)
+        if (calendarFilters.status === 'pending') {
+          dayTasks = dayTasks.filter(t => t.type !== 'event' && !t.completed);
+        } else if (calendarFilters.status === 'completed') {
+          dayTasks = dayTasks.filter(t => t.type !== 'event' && t.completed);
         }
 
         // Apply category filter
@@ -3063,16 +3074,16 @@
         return assignees.includes(currentUser);
       });
 
-      // Apply status filter
-      if (myTasksFilters.status === 'pending') {
-        myTasks = myTasks.filter(t => !t.completed);
-      } else if (myTasksFilters.status === 'completed') {
-        myTasks = myTasks.filter(t => t.completed);
-      }
-
-      // Apply type filter
+      // Apply type filter first
       if (myTasksFilters.type !== 'all') {
         myTasks = myTasks.filter(t => t.type === myTasksFilters.type);
+      }
+
+      // Apply status filter only to tasks (not events)
+      if (myTasksFilters.status === 'pending') {
+        myTasks = myTasks.filter(t => t.type !== 'event' && !t.completed);
+      } else if (myTasksFilters.status === 'completed') {
+        myTasks = myTasks.filter(t => t.type !== 'event' && t.completed);
       }
 
       // Apply category filter
@@ -3188,16 +3199,16 @@
           return;
         }
 
-        // Apply status filter
-        if (allTasksFilters.status === 'pending') {
-          userTasks = userTasks.filter(t => !t.completed);
-        } else if (allTasksFilters.status === 'completed') {
-          userTasks = userTasks.filter(t => t.completed);
-        }
-
-        // Apply type filter
+        // Apply type filter first
         if (allTasksFilters.type !== 'all') {
           userTasks = userTasks.filter(t => t.type === allTasksFilters.type);
+        }
+
+        // Apply status filter only to tasks (not events)
+        if (allTasksFilters.status === 'pending') {
+          userTasks = userTasks.filter(t => t.type !== 'event' && !t.completed);
+        } else if (allTasksFilters.status === 'completed') {
+          userTasks = userTasks.filter(t => t.type !== 'event' && t.completed);
         }
 
         // Apply category filter
@@ -3913,6 +3924,15 @@
       showTaskSuccess('✓ Note added');
     }
 
+    function confirmDeleteNote(noteId) {
+      if (!notes[noteId]) return;
+
+      // Show confirmation dialog
+      if (confirm('Are you sure you want to delete this note? This cannot be undone.')) {
+        deleteNote(noteId);
+      }
+    }
+
     function deleteNote(noteId) {
       if (!notes[noteId]) return;
 
@@ -3975,6 +3995,7 @@
       }
 
       notes[noteId].text = text;
+      notes[noteId].updatedAt = new Date().toISOString();
       saveData();
       renderNotes();
       showTaskSuccess('✓ Note saved');
@@ -4002,14 +4023,31 @@
         noteText.style.cssText = 'color: var(--text-primary); font-size: 13px; line-height: 1.4; word-wrap: break-word;';
         noteText.textContent = '• ' + note.text;
 
+        // Format dates
+        const formatDate = (isoString) => {
+          const date = new Date(isoString);
+          const options = { month: 'short', day: 'numeric', year: 'numeric' };
+          return date.toLocaleDateString('en-US', options);
+        };
+
+        const noteMeta = document.createElement('div');
+        noteMeta.className = 'note-meta';
+        const createdDate = formatDate(note.createdAt);
+        const updatedDate = note.updatedAt ? formatDate(note.updatedAt) : null;
+        const metaText = updatedDate && updatedDate !== createdDate
+          ? `created on ${createdDate}, last updated ${updatedDate}`
+          : `created on ${createdDate}`;
+        noteMeta.style.cssText = 'font-size: 10px; font-style: italic; color: var(--text-tertiary); margin-top: 4px;';
+        noteMeta.textContent = metaText;
+
         const noteActions = document.createElement('div');
         noteActions.className = 'note-actions';
-        noteActions.style.cssText = 'display: flex; gap: 6px;';
+        noteActions.style.cssText = 'display: flex; gap: 6px; justify-content: flex-start;';
 
         const editBtn = document.createElement('button');
         editBtn.textContent = '✏️ Edit';
         editBtn.className = 'note-btn note-edit-btn';
-        editBtn.style.cssText = 'flex: 1; background: var(--blue); color: white; padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 12px; transition: opacity 0.2s;';
+        editBtn.style.cssText = 'background: var(--blue); color: white; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 11px; transition: opacity 0.2s;';
         editBtn.onclick = () => editNote(note.id);
         editBtn.onmouseover = () => editBtn.style.opacity = '0.9';
         editBtn.onmouseout = () => editBtn.style.opacity = '1';
@@ -4017,8 +4055,8 @@
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = '🗑️ Delete';
         deleteBtn.className = 'note-btn note-delete-btn';
-        deleteBtn.style.cssText = 'flex: 1; background: var(--red); color: white; padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 12px; transition: opacity 0.2s;';
-        deleteBtn.onclick = () => deleteNote(note.id);
+        deleteBtn.style.cssText = 'background: var(--red); color: white; padding: 4px 8px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 11px; transition: opacity 0.2s;';
+        deleteBtn.onclick = () => confirmDeleteNote(note.id);
         deleteBtn.onmouseover = () => deleteBtn.style.opacity = '0.9';
         deleteBtn.onmouseout = () => deleteBtn.style.opacity = '1';
 
@@ -4026,6 +4064,7 @@
         noteActions.appendChild(deleteBtn);
 
         noteItem.appendChild(noteText);
+        noteItem.appendChild(noteMeta);
         noteItem.appendChild(noteActions);
         notesList.appendChild(noteItem);
       });
