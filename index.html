@@ -37,6 +37,7 @@
       --cat-social: #f43f5e;
       --cat-travel: #14b8a6;
       --cat-fitness: #ef4444;
+      --cat-kids: #d946ef;
 
       /* Task size colors */
       --size-ant: #d1d5db;
@@ -279,8 +280,10 @@
     .task-assign-grid label {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
       white-space: nowrap;
+      font-size: 14px;
+      font-weight: 500;
     }
 
     input, select, textarea {
@@ -450,12 +453,14 @@
       padding: 2px 4px;
       border-radius: 3px;
       font-size: 10px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       font-weight: 500;
       line-height: 1.2;
-      word-wrap: break-word;
-      overflow-wrap: break-word;
     }
 
+    .calendar-task.kids { background: var(--cat-kids); }
     .calendar-task.chores { background: var(--cat-chores); }
     .calendar-task.homework { background: var(--cat-homework); }
     .calendar-task.career { background: var(--cat-career); }
@@ -473,13 +478,13 @@
     }
 
     .calendar-task-cat {
-      font-size: 10px;
+      font-size: 9px;
       font-style: italic;
       opacity: 0.9;
     }
 
     .calendar-task-time {
-      font-size: 10px;
+      font-size: 9px;
       opacity: 0.85;
       margin-top: 1px;
     }
@@ -504,6 +509,7 @@
       border-left: 4px solid var(--accent);
     }
 
+    .item.kids { border-left-color: var(--cat-kids); }
     .item.chores { border-left-color: var(--cat-chores); }
     .item.homework { border-left-color: var(--cat-homework); }
     .item.career { border-left-color: var(--cat-career); }
@@ -561,6 +567,7 @@
       color: var(--accent);
     }
 
+    .category-badge.kids { background: rgba(217, 70, 239, 0.15); color: var(--cat-kids); }
     .category-badge.chores { background: rgba(16, 185, 129, 0.15); color: var(--cat-chores); }
     .category-badge.homework { background: rgba(59, 130, 246, 0.15); color: var(--cat-homework); }
     .category-badge.career { background: rgba(30, 64, 175, 0.15); color: var(--cat-career); }
@@ -758,7 +765,7 @@
     .filter-bar {
       display: flex;
       flex-wrap: wrap;
-      gap: 16px;
+      gap: 12px;
       margin-bottom: 20px;
       padding: 12px;
       background: var(--bg-secondary);
@@ -770,7 +777,7 @@
     .filter-group {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 3px;
     }
 
     .filter-label {
@@ -782,17 +789,17 @@
 
     .filter-buttons {
       display: flex;
-      gap: 6px;
+      gap: 4px;
       flex-wrap: wrap;
     }
 
     .filter-btn {
-      padding: 6px 10px;
+      padding: 5px 8px;
       background: var(--bg-tertiary);
       border: 1px solid var(--border);
       border-radius: 4px;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 500;
       color: var(--text-secondary);
       transition: all 0.2s;
@@ -956,10 +963,6 @@
       }
 
       /* Calendar optimization for narrow mobile */
-      .calendar-wrapper {
-        overflow-x: hidden;
-      }
-
       .calendar-grid {
         gap: 0px;
         min-height: auto;
@@ -968,7 +971,6 @@
       .calendar-day {
         min-height: 45px;
         padding: 4px;
-        overflow: hidden;
       }
 
       .calendar-day-header {
@@ -984,32 +986,6 @@
       .calendar-task {
         font-size: 8px;
         padding: 1px 2px;
-        word-break: break-word;
-      }
-
-      .calendar-task-cat {
-        font-size: 8px;
-      }
-
-      .calendar-task-time {
-        font-size: 8px;
-      }
-
-      /* Compact assign-to checkboxes for narrow mobile */
-      .task-assign-grid {
-        gap: 8px;
-        flex-wrap: nowrap;
-      }
-
-      .task-assign-grid label {
-        gap: 3px;
-        font-size: 13px;
-        flex: 0 1 auto;
-      }
-
-      .task-assign-grid input[type="checkbox"] {
-        width: 14px !important;
-        height: 14px !important;
       }
     }
 
@@ -1053,40 +1029,6 @@
       .calendar-task {
         font-size: 7px;
         padding: 1px;
-      }
-
-      .calendar-task-cat {
-        font-size: 7px;
-      }
-
-      .calendar-task-time {
-        font-size: 7px;
-      }
-
-      /* Ultra-compact assign-to checkboxes for ultra-narrow mobile */
-      .task-assign-grid {
-        gap: 6px;
-        flex-wrap: nowrap;
-      }
-
-      .task-assign-grid label {
-        gap: 2px;
-        font-size: 12px;
-        flex: 0 1 auto;
-      }
-
-      .task-assign-grid input[type="checkbox"] {
-        width: 12px !important;
-        height: 12px !important;
-      }
-
-      /* Calendar for ultra-narrow mobile */
-      .calendar-wrapper {
-        overflow-x: hidden;
-      }
-
-      .calendar-task {
-        word-break: break-word;
       }
     }
 
@@ -1179,6 +1121,86 @@
       text-align: center;
       margin-top: 12px;
     }
+
+    .note-item {
+      background: var(--bg-secondary);
+      padding: 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .note-text {
+      flex: 1;
+      word-break: break-word;
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+
+    .note-actions {
+      display: flex;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .note-btn {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+      transition: opacity 0.2s;
+    }
+
+    .note-edit-btn {
+      background: var(--blue);
+      color: white;
+    }
+
+    .note-delete-btn {
+      background: var(--red);
+      color: white;
+    }
+
+    .note-btn:hover {
+      opacity: 0.9;
+    }
+
+    .note-edit-input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 14px;
+    }
+
+    .note-save-btn {
+      padding: 6px 10px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+    }
+
+    .note-cancel-btn {
+      padding: 6px 10px;
+      background: var(--text-tertiary);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 500;
+    }
   </style>
 </head>
 <body>
@@ -1201,7 +1223,7 @@
       <div class="user-selector">
         <div style="font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 8px; padding: 0 12px;">
           <span>Logged in as:</span>
-          <strong id="logged-in-user" style="color: var(--accent);">—</strong>
+          <strong id="logged-in-user" style="color: var(--accent); cursor: pointer;" onclick="openNotepadIfAllowed()">—</strong>
         </div>
         <button onclick="logout()" style="padding: 8px 12px; border-radius: 6px; border: 2px solid transparent; background: var(--bg-tertiary); color: var(--text-secondary); cursor: pointer; font-weight: 500; font-size: 13px; transition: all 0.2s;">🔒 Logout</button>
       </div>
@@ -1215,6 +1237,7 @@
           <div class="nav-item active" data-section="calendar">📅 Calendar</div>
           <div class="nav-item" data-section="my-tasks">✓ Items</div>
           <div class="nav-item" data-section="shop">🛒 Shop</div>
+          <div class="nav-item" id="notepad-nav-item" data-section="notepad" style="display: none;">📝 Notepad</div>
         </div>
       </div>
 
@@ -1250,6 +1273,14 @@
                   <button class="filter-btn active" data-filter="status" data-value="all" onclick="updateCalendarFilter('status', 'all', this)">All</button>
                   <button class="filter-btn" data-filter="status" data-value="pending" onclick="updateCalendarFilter('status', 'pending', this)">Pending</button>
                   <button class="filter-btn" data-filter="status" data-value="completed" onclick="updateCalendarFilter('status', 'completed', this)">Completed</button>
+                </div>
+              </div>
+              <div class="filter-group">
+                <div class="filter-label">Type</div>
+                <div class="filter-buttons">
+                  <button class="filter-btn active" data-filter="type" data-value="all" onclick="updateCalendarFilter('type', 'all', this)">All</button>
+                  <button class="filter-btn" data-filter="type" data-value="task" onclick="updateCalendarFilter('type', 'task', this)">Tasks</button>
+                  <button class="filter-btn" data-filter="type" data-value="event" onclick="updateCalendarFilter('type', 'event', this)">Events</button>
                 </div>
               </div>
               <div class="filter-group" id="calendar-categories-filter">
@@ -1294,6 +1325,7 @@
               </fieldset>
               <select id="task-category">
                 <option value="">Select category...</option>
+                <option value="kids">😎 Kids</option>
                 <option value="chores">🏠 Chores</option>
                 <option value="homework">✏️ Homework</option>
                 <option value="career">💼 Career</option>
@@ -1363,6 +1395,14 @@
                 <button class="filter-btn active" data-filter="status" data-value="all" onclick="updateMyTasksFilter('status', 'all', this)">All</button>
                 <button class="filter-btn" data-filter="status" data-value="pending" onclick="updateMyTasksFilter('status', 'pending', this)">Pending</button>
                 <button class="filter-btn" data-filter="status" data-value="completed" onclick="updateMyTasksFilter('status', 'completed', this)">Completed</button>
+              </div>
+            </div>
+            <div class="filter-group">
+              <div class="filter-label">Type</div>
+              <div class="filter-buttons">
+                <button class="filter-btn active" data-filter="type" data-value="all" onclick="updateMyTasksFilter('type', 'all', this)">All</button>
+                <button class="filter-btn" data-filter="type" data-value="task" onclick="updateMyTasksFilter('type', 'task', this)">Tasks</button>
+                <button class="filter-btn" data-filter="type" data-value="event" onclick="updateMyTasksFilter('type', 'event', this)">Events</button>
               </div>
             </div>
             <div class="filter-group">
@@ -1444,7 +1484,7 @@
           <div class="leaderboard" id="leaderboard-content"></div>
 
           <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border); display: none;" id="clear-data-section">
-            <button class="btn-small" style="font-size: 11px; opacity: 0.6;" onclick="showClearDataConfirm()">Clear All Data</button>
+            <button style="background: var(--red); color: white; padding: 8px 14px; font-size: 13px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;" onclick="showClearDataConfirm()">🗑️ Delete All Data</button>
           </div>
         </section>
 
@@ -1512,6 +1552,21 @@
             <div id="claimed-items" style="border: 1px solid var(--border); border-radius: 6px; background: var(--bg-secondary); overflow-y: auto; max-height: 300px;"></div>
           </div>
         </section>
+
+        <!-- Notepad -->
+        <section id="notepad" class="section" style="display: none;">
+          <div class="header">
+            <h2>📝 Notepad</h2>
+            <p>Personal notes and reminders</p>
+          </div>
+
+          <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+            <input type="text" id="notepad-input" placeholder="Add a new note..." style="flex: 1; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
+            <button onclick="addNote()" style="background: var(--accent); color: white; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Add Note</button>
+          </div>
+
+          <div id="notepad-list" style="display: flex; flex-direction: column; gap: 8px; max-height: 500px; overflow-y: auto;"></div>
+        </section>
       </div>
     </div>
   </div>
@@ -1532,6 +1587,7 @@
         <div>
           <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Category</label>
           <select id="edit-task-category" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
+            <option value="kids">😎 Kids</option>
             <option value="chores">🏠 Chores</option>
             <option value="homework">✏️ Homework</option>
             <option value="career">💼 Career</option>
@@ -1699,6 +1755,7 @@
     };
 
     const categories = {
+      kids: '😎 Kids',
       chores: '🏠 Chores',
       homework: '✏️ Homework',
       career: '💼 Career',
@@ -1738,6 +1795,7 @@
     let purchaseHistory = []; // Array of { userId, itemId, quantity, cost, date }
     let claimedItems = []; // Array of { userId, itemId, quantity, cost, date, claimedAt, id }
     let deletedTaskStats = []; // Array of { completedAt, size, assignedTo, wb } - permanent record of deleted task stats
+    let notes = {}; // { noteId: { id, text, createdAt, userId } }
 
     // Initialize spending and earning tracking
     Object.keys(users).forEach(userId => {
@@ -1746,9 +1804,9 @@
     });
 
     // Filter state
-    let calendarFilters = { person: 'all', status: 'all', categories: new Set(Object.keys(categories)) };
-    let myTasksFilters = { status: 'all', categories: new Set(Object.keys(categories)), showArchived: false };
-    let allTasksFilters = { person: 'all', status: 'all', categories: new Set(Object.keys(categories)), showArchived: false };
+    let calendarFilters = { person: 'all', status: 'all', type: 'all', categories: new Set(Object.keys(categories)) };
+    let myTasksFilters = { status: 'all', type: 'all', categories: new Set(Object.keys(categories)), showArchived: false };
+    let allTasksFilters = { person: 'all', status: 'all', type: 'all', categories: new Set(Object.keys(categories)), showArchived: false };
     let leaderboardFilters = { dateRange: 'all-time' };
     let shopViewUser = 'ian'; // Track which user's shop is being viewed (for admin view)
     let calendarShowAll = false;
@@ -1815,6 +1873,9 @@
           claimedItems = data.claimedItems || [];
           deletedTaskStats = data.deletedTaskStats || [];
 
+          // Load notes for all users
+          notes = data.notes || {};
+
           // Ensure all users have spending and earning entries
           Object.keys(users).forEach(userId => {
             if (!(userId in shopSpending)) {
@@ -1877,6 +1938,7 @@
         purchaseHistory: purchaseHistory,
         claimedItems: claimedItems,
         deletedTaskStats: deletedTaskStats,
+        notes: notes,
         lastUpdated: new Date().toISOString()
       };
       database.ref('familyHub').set(data).catch(error => {
@@ -1885,6 +1947,11 @@
     }
 
     function showClearDataConfirm() {
+      // Only Ian can delete all data
+      if (currentUser !== 'ian') {
+        showTaskError('Only Ian can delete all data');
+        return;
+      }
       document.getElementById('clear-data-modal').classList.add('active');
     }
 
@@ -1899,6 +1966,7 @@
       earnedWBPerUser = {};
       purchaseHistory = [];
       claimedItems = [];
+      notes = {};
       Object.keys(users).forEach(userId => {
         shopSpending[userId] = 0;
         earnedWBPerUser[userId] = 0;
@@ -1973,8 +2041,11 @@
       document.getElementById('calendar-person-filter').style.display = isAdmin ? 'block' : 'none';
       document.getElementById('calendar-categories-filter').style.display = isAdmin ? 'block' : 'none';
 
-      // Show clear data button only for admins
-      document.getElementById('clear-data-section').style.display = isAdmin ? 'block' : 'none';
+      // Show clear data button only for Ian
+      document.getElementById('clear-data-section').style.display = (currentUser === 'ian') ? 'block' : 'none';
+
+      // Show notepad nav item only for Ian and Cindy
+      document.getElementById('notepad-nav-item').style.display = (currentUser === 'ian' || currentUser === 'cindy') ? 'block' : 'none';
 
       // For admins, default to their own tasks. For non-admins, lock to their own tasks
       calendarFilters.person = currentUser;
@@ -2629,6 +2700,10 @@
         calendarFilters.status = value;
         btn.parentElement.querySelectorAll('[data-filter="status"]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
+      } else if (filterType === 'type') {
+        calendarFilters.type = value;
+        btn.parentElement.querySelectorAll('[data-filter="type"]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
       } else if (filterType === 'category') {
         if (calendarFilters.categories.has(value)) {
           calendarFilters.categories.delete(value);
@@ -2669,7 +2744,11 @@
     function updateMyTasksFilter(filterType, value, btn) {
       if (filterType === 'status') {
         myTasksFilters.status = value;
-        btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.parentElement.querySelectorAll('[data-filter="status"]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      } else if (filterType === 'type') {
+        myTasksFilters.type = value;
+        btn.parentElement.querySelectorAll('[data-filter="type"]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
       } else if (filterType === 'category') {
         if (myTasksFilters.categories.has(value)) {
@@ -2692,6 +2771,10 @@
       if (filterType === 'status') {
         allTasksFilters.status = value;
         btn.parentElement.querySelectorAll('[data-filter="status"]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      } else if (filterType === 'type') {
+        allTasksFilters.type = value;
+        btn.parentElement.querySelectorAll('[data-filter="type"]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
       } else if (filterType === 'category') {
         if (allTasksFilters.categories.has(value)) {
@@ -2868,6 +2951,11 @@
           dayTasks = dayTasks.filter(t => t.completed);
         }
 
+        // Apply type filter
+        if (calendarFilters.type !== 'all') {
+          dayTasks = dayTasks.filter(t => t.itemType === calendarFilters.type);
+        }
+
         // Apply category filter
         dayTasks = dayTasks.filter(t => calendarFilters.categories.has(t.category));
 
@@ -2923,6 +3011,11 @@
         myTasks = myTasks.filter(t => !t.completed);
       } else if (myTasksFilters.status === 'completed') {
         myTasks = myTasks.filter(t => t.completed);
+      }
+
+      // Apply type filter
+      if (myTasksFilters.type !== 'all') {
+        myTasks = myTasks.filter(t => t.itemType === myTasksFilters.type);
       }
 
       // Apply category filter
@@ -3043,6 +3136,11 @@
           userTasks = userTasks.filter(t => !t.completed);
         } else if (allTasksFilters.status === 'completed') {
           userTasks = userTasks.filter(t => t.completed);
+        }
+
+        // Apply type filter
+        if (allTasksFilters.type !== 'all') {
+          userTasks = userTasks.filter(t => t.itemType === allTasksFilters.type);
         }
 
         // Apply category filter
@@ -3554,11 +3652,18 @@
     // Navigation
     document.querySelectorAll('.nav-item').forEach(item => {
       item.addEventListener('click', (e) => {
+        let section = e.target.dataset.section;
+
+        // For notepad, use the special access-controlled handler
+        if (section === 'notepad') {
+          openNotepadIfAllowed();
+          return;
+        }
+
         document.querySelectorAll('.nav-item').forEach(ni => ni.classList.remove('active'));
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
 
         e.target.classList.add('active');
-        let section = e.target.dataset.section;
 
         // For admins, "My Tasks" nav item shows the all-tasks section with person filter
         if (section === 'my-tasks' && users[currentUser].role === 'admin') {
@@ -3690,6 +3795,174 @@
         document.getElementById('emailInput').focus();
       }).catch((error) => {
         console.error('Logout error:', error);
+      });
+    }
+
+    // Notepad Functions
+    function openNotepadIfAllowed() {
+      // Only Ian and Cindy can access notepad
+      if (currentUser !== 'ian' && currentUser !== 'cindy') {
+        showTaskError('Only Ian and Cindy can access the Notepad');
+        return;
+      }
+
+      // Hide all sections and show notepad
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+      });
+
+      // Deactivate all nav items
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+
+      // Activate notepad section and nav item
+      document.getElementById('notepad').classList.add('active');
+      document.getElementById('notepad-nav-item').classList.add('active');
+
+      // Render the notes
+      renderNotes();
+    }
+
+    function addNote() {
+      const input = document.getElementById('notepad-input');
+      const text = input.value.trim();
+
+      if (!text) {
+        showTaskError('Please enter a note');
+        return;
+      }
+
+      const noteId = Date.now().toString();
+      const note = {
+        id: noteId,
+        text: text,
+        createdAt: new Date().toISOString(),
+        userId: currentUser
+      };
+
+      notes[noteId] = note;
+      saveData();
+      input.value = '';
+      renderNotes();
+      showTaskSuccess('✓ Note added');
+    }
+
+    function deleteNote(noteId) {
+      if (!notes[noteId]) return;
+
+      delete notes[noteId];
+      saveData();
+      renderNotes();
+      showTaskSuccess('✓ Note deleted');
+    }
+
+    function editNote(noteId) {
+      if (!notes[noteId]) return;
+
+      const noteElement = document.querySelector(`[data-note-id="${noteId}"]`);
+      const noteText = noteElement.querySelector('.note-text');
+      const noteActions = noteElement.querySelector('.note-actions');
+
+      // Create edit input
+      const editInput = document.createElement('input');
+      editInput.type = 'text';
+      editInput.className = 'note-edit-input';
+      editInput.value = notes[noteId].text;
+      editInput.style.cssText = 'width: 100%; padding: 8px; border: 1px solid var(--accent); border-radius: 4px; background: var(--bg-primary); color: var(--text-primary); font-size: 13px; margin-bottom: 8px;';
+
+      // Hide text and actions, show edit input
+      noteText.style.display = 'none';
+      noteActions.style.display = 'none';
+      noteElement.insertBefore(editInput, noteText);
+
+      // Create save and cancel buttons
+      const buttonContainer = document.createElement('div');
+      buttonContainer.style.cssText = 'display: flex; gap: 8px;';
+
+      const saveBtn = document.createElement('button');
+      saveBtn.textContent = 'Save';
+      saveBtn.style.cssText = 'flex: 1; background: var(--accent); color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 12px;';
+      saveBtn.onclick = () => saveNote(noteId, editInput.value);
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.style.cssText = 'flex: 1; background: var(--text-tertiary); color: white; padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 12px;';
+      cancelBtn.onclick = () => {
+        editInput.remove();
+        buttonContainer.remove();
+        noteText.style.display = 'block';
+        noteActions.style.display = 'flex';
+      };
+
+      buttonContainer.appendChild(saveBtn);
+      buttonContainer.appendChild(cancelBtn);
+      editInput.parentNode.insertBefore(buttonContainer, editInput.nextSibling);
+      editInput.focus();
+    }
+
+    function saveNote(noteId, editedText) {
+      const text = editedText.trim();
+
+      if (!text) {
+        showTaskError('Note cannot be empty');
+        return;
+      }
+
+      notes[noteId].text = text;
+      saveData();
+      renderNotes();
+      showTaskSuccess('✓ Note saved');
+    }
+
+    function renderNotes() {
+      const notesList = document.getElementById('notepad-list');
+      notesList.innerHTML = '';
+
+      // Get notes for current user
+      const userNotes = Object.values(notes).filter(note => note.userId === currentUser);
+
+      if (userNotes.length === 0) {
+        notesList.innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 20px; font-size: 13px;">No notes yet. Add one to get started!</p>';
+        return;
+      }
+
+      userNotes.forEach(note => {
+        const noteItem = document.createElement('div');
+        noteItem.setAttribute('data-note-id', note.id);
+        noteItem.style.cssText = 'background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 8px;';
+
+        const noteText = document.createElement('div');
+        noteText.className = 'note-text';
+        noteText.style.cssText = 'color: var(--text-primary); font-size: 13px; line-height: 1.4; word-wrap: break-word;';
+        noteText.textContent = '• ' + note.text;
+
+        const noteActions = document.createElement('div');
+        noteActions.className = 'note-actions';
+        noteActions.style.cssText = 'display: flex; gap: 6px;';
+
+        const editBtn = document.createElement('button');
+        editBtn.textContent = '✏️ Edit';
+        editBtn.className = 'note-btn note-edit-btn';
+        editBtn.style.cssText = 'flex: 1; background: var(--blue); color: white; padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 12px; transition: opacity 0.2s;';
+        editBtn.onclick = () => editNote(note.id);
+        editBtn.onmouseover = () => editBtn.style.opacity = '0.9';
+        editBtn.onmouseout = () => editBtn.style.opacity = '1';
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = '🗑️ Delete';
+        deleteBtn.className = 'note-btn note-delete-btn';
+        deleteBtn.style.cssText = 'flex: 1; background: var(--red); color: white; padding: 6px 10px; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 12px; transition: opacity 0.2s;';
+        deleteBtn.onclick = () => deleteNote(note.id);
+        deleteBtn.onmouseover = () => deleteBtn.style.opacity = '0.9';
+        deleteBtn.onmouseout = () => deleteBtn.style.opacity = '1';
+
+        noteActions.appendChild(editBtn);
+        noteActions.appendChild(deleteBtn);
+
+        noteItem.appendChild(noteText);
+        noteItem.appendChild(noteActions);
+        notesList.appendChild(noteItem);
       });
     }
 
