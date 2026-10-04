@@ -1424,10 +1424,6 @@
                 <option value="monthly">Monthly</option>
               </select>
               <input type="number" id="task-occurrences" placeholder="Number of occurrences" min="1" style="display: none;">
-              <label style="display: none; align-items: center; gap: 8px; font-size: 13px; cursor: pointer;">
-                <input type="checkbox" id="task-completed" style="width: 16px; height: 16px; cursor: pointer;">
-                Mark as completed
-              </label>
               <div id="task-error" style="display: none; background-color: #fee2e2; color: #dc2626; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; border: 1px solid #fecaca;"></div>
               <div id="task-success" style="display: none; background-color: #dcfce7; color: #16a34a; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; border: 1px solid #bbf7d0;"></div>
               <button onclick="addTask()">Add</button>
@@ -3087,7 +3083,8 @@
 
       // Hide past events from items page (but keep past tasks)
       myTasks = myTasks.filter(t => {
-        if (t.type === 'event' && t.dueDate) {
+        if (t.type === 'event') {
+          if (!t.dueDate) return true; // Show events without due dates
           const eventDate = t.dueDate.split(' ')[0]; // Get just the date part
           return eventDate >= TODAY;
         }
@@ -3221,7 +3218,8 @@
 
         // Hide past events from items page (but keep past tasks)
         userTasks = userTasks.filter(t => {
-          if (t.type === 'event' && t.dueDate) {
+          if (t.type === 'event') {
+            if (!t.dueDate) return true; // Show events without due dates
             const eventDate = t.dueDate.split(' ')[0]; // Get just the date part
             return eventDate >= TODAY;
           }
@@ -3317,7 +3315,7 @@
 
         html += `
           <div style="margin-bottom: 24px;">
-            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; color: var(--text-primary);">${userData.name}'s Tasks</h3>
+            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; color: var(--text-primary);">${userData.name}'s Items</h3>
             <div class="items-list" style="flex: none; gap: 12px;">
               ${tasksList}
             </div>
