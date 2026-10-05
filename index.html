@@ -2265,7 +2265,6 @@
       const durationMinute = document.getElementById('task-duration-minute').value;
       const endDate = document.getElementById('task-end-date').value || null;
       const recur = document.getElementById('task-recur').value;
-      const completed = document.getElementById('task-completed').checked;
       const occurrences = recur !== 'once' ? parseInt(document.getElementById('task-occurrences').value) : null;
 
       // Format due date with time if provided
@@ -2324,7 +2323,7 @@
         recurPattern: recur,
         maxOccurrences: occurrences,
         occurrenceNumber: 1,
-        completed: itemType === 'task' ? completed : false,
+        completed: false,
         type: itemType,
         createdAt: new Date().toISOString()
       };
@@ -2354,7 +2353,6 @@
       document.getElementById('task-end-date').value = '';
       document.getElementById('task-recur').value = 'once';
       document.getElementById('task-occurrences').value = '';
-      document.getElementById('task-completed').checked = false;
       document.querySelector('input[name="item-type"][value="task"]').checked = true;
       toggleItemType('task');
       updateRecurringFields();
@@ -3081,10 +3079,13 @@
         myTasks = myTasks.filter(t => t.type === 'event' || t.completed);
       }
 
-      // Hide past events from items page (but keep past tasks)
+      // Hide past events from items page (but keep past tasks and recurring events)
       myTasks = myTasks.filter(t => {
         if (t.type === 'event') {
           if (!t.dueDate) return true; // Show events without due dates
+          // Keep recurring events even if first occurrence is past (future occurrences may exist)
+          if (t.recurPattern && t.recurPattern !== 'once') return true;
+          // For single events, only show if date is today or in future
           const eventDate = t.dueDate.split(' ')[0]; // Get just the date part
           return eventDate >= TODAY;
         }
@@ -3216,10 +3217,13 @@
           userTasks = userTasks.filter(t => t.type === 'event' || t.completed);
         }
 
-        // Hide past events from items page (but keep past tasks)
+        // Hide past events from items page (but keep past tasks and recurring events)
         userTasks = userTasks.filter(t => {
           if (t.type === 'event') {
             if (!t.dueDate) return true; // Show events without due dates
+            // Keep recurring events even if first occurrence is past (future occurrences may exist)
+            if (t.recurPattern && t.recurPattern !== 'once') return true;
+            // For single events, only show if date is today or in future
             const eventDate = t.dueDate.split(' ')[0]; // Get just the date part
             return eventDate >= TODAY;
           }
