@@ -2255,17 +2255,19 @@
     }
 
     function addTask() {
+      try {
       const title = document.getElementById('task-title').value.trim();
       const itemType = document.querySelector('input[name="item-type"]:checked').value || 'task';
       const category = document.getElementById('task-category').value;
       const dueDate = document.getElementById('task-due-date').value;
-      const dueHour = document.getElementById('task-due-hour').value;
-      const dueMinute = document.getElementById('task-due-minute').value;
-      const durationHour = document.getElementById('task-duration-hour').value;
-      const durationMinute = document.getElementById('task-duration-minute').value;
+      const dueHour = document.getElementById('task-due-hour').value || '';
+      const dueMinute = document.getElementById('task-due-minute').value || '';
+      const durationHour = document.getElementById('task-duration-hour').value || '';
+      const durationMinute = document.getElementById('task-duration-minute').value || '';
       const endDate = document.getElementById('task-end-date').value || null;
       const recur = document.getElementById('task-recur').value;
       const occurrences = recur !== 'once' ? parseInt(document.getElementById('task-occurrences').value) : null;
+      console.log('[addTask] Form values:', {title, itemType, category, dueDate, recur});
 
       // Format due date with time if provided
       const formattedDueDate = dueDate + (dueHour || dueMinute ? ` ${String(dueHour || '00').padStart(2, '0')}:${String(dueMinute || '00').padStart(2, '0')}` : '');
@@ -2358,8 +2360,14 @@
       updateRecurringFields();
 
       saveData();
+      console.log('[addTask] Before renderAll, tasks:', tasks.length);
       renderAll();
+      console.log('[addTask] After renderAll');
       showTaskSuccess(`✓ ${itemType === 'event' ? 'Event' : 'Task'} created!`);
+      } catch (error) {
+        console.error('[addTask] Error:', error);
+        showTaskError('Error creating task: ' + error.message);
+      }
     }
 
     function addAdminTask() {
@@ -3079,19 +3087,6 @@
         myTasks = myTasks.filter(t => t.type === 'event' || t.completed);
       }
 
-      // Hide past events from items page (but keep past tasks and recurring events)
-      myTasks = myTasks.filter(t => {
-        if (t.type === 'event') {
-          if (!t.dueDate) return true; // Show events without due dates
-          // Keep recurring events even if first occurrence is past (future occurrences may exist)
-          if (t.recurPattern && t.recurPattern !== 'once') return true;
-          // For single events, only show if date is today or in future
-          const eventDate = t.dueDate.split(' ')[0]; // Get just the date part
-          return eventDate >= TODAY;
-        }
-        return true; // Keep all tasks
-      });
-
       // Apply category filter
       myTasks = myTasks.filter(t => myTasksFilters.categories.has(t.category));
 
@@ -3143,6 +3138,18 @@
       });
 
       myTasks = myTasks.filter(t => !tasksToRemove.has(t.id));
+
+      // Hide past single events from items page (after recurring logic has run)
+      myTasks = myTasks.filter(t => {
+        if (t.type === 'event' && !t.recurPattern) {
+          // Only filter out non-recurring events that are in the past
+          if (t.dueDate) {
+            const eventDate = t.dueDate.split(' ')[0];
+            return eventDate >= TODAY;
+          }
+        }
+        return true; // Keep all tasks and recurring events
+      });
 
       myTasks.sort((a, b) => parseTaskDate(a.dueDate) - parseTaskDate(b.dueDate));
       
@@ -3217,19 +3224,6 @@
           userTasks = userTasks.filter(t => t.type === 'event' || t.completed);
         }
 
-        // Hide past events from items page (but keep past tasks and recurring events)
-        userTasks = userTasks.filter(t => {
-          if (t.type === 'event') {
-            if (!t.dueDate) return true; // Show events without due dates
-            // Keep recurring events even if first occurrence is past (future occurrences may exist)
-            if (t.recurPattern && t.recurPattern !== 'once') return true;
-            // For single events, only show if date is today or in future
-            const eventDate = t.dueDate.split(' ')[0]; // Get just the date part
-            return eventDate >= TODAY;
-          }
-          return true; // Keep all tasks
-        });
-
         // Apply category filter
         userTasks = userTasks.filter(t => allTasksFilters.categories.has(t.category));
 
@@ -3281,6 +3275,18 @@
         });
 
         userTasks = userTasks.filter(t => !tasksToRemove.has(t.id));
+
+        // Hide past single events from items page (after recurring logic has run)
+        userTasks = userTasks.filter(t => {
+          if (t.type === 'event' && !t.recurPattern) {
+            // Only filter out non-recurring events that are in the past
+            if (t.dueDate) {
+              const eventDate = t.dueDate.split(' ')[0];
+              return eventDate >= TODAY;
+            }
+          }
+          return true; // Keep all tasks and recurring events
+        });
 
         userTasks.sort((a, b) => parseTaskDate(a.dueDate) - parseTaskDate(b.dueDate));
 
