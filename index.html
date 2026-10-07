@@ -307,13 +307,17 @@
       box-shadow: 0 0 0 2px var(--accent-light);
     }
 
-    /* Make date picker calendar icon visible on dark mode */
+    /* Date picker calendar icon styling */
     input[type="date"]::-webkit-calendar-picker-indicator {
-      filter: invert(1) brightness(1.2);
       cursor: pointer;
     }
 
-    /* Dark mode override for better calendar icon visibility */
+    /* Light mode: keep default dark icon */
+    :root:not([data-theme="dark"]) input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: none;
+    }
+
+    /* Dark mode: invert to light icon */
     @media (prefers-color-scheme: dark) {
       input[type="date"]::-webkit-calendar-picker-indicator {
         filter: invert(1) brightness(1.5);
