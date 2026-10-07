@@ -3159,6 +3159,14 @@
 
       console.log('DEBUG - Before event date filter:', myTasks.filter(t => t.type === 'event').map(t => ({title: t.title, dueDate: t.dueDate, recurPattern: t.recurPattern})));
 
+      // Helper to format date in local time
+      const formatDateLocal = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
       // Hide past events (both single and recurring)
       // Events are "complete" when today > dueDate, so show only future events
       myTasks = myTasks.filter(t => {
@@ -3169,36 +3177,49 @@
           }
 
           let eventDate = t.dueDate.split(' ')[0];
+          const originalDueDate = t.dueDate;
+          console.log(`Event ${t.title}: recurPattern=${t.recurPattern}, original eventDate=${eventDate}, TODAY=${TODAY}`);
 
           // For recurring events with past dates, calculate next occurrence
           if (t.recurPattern && t.recurPattern !== 'once' && eventDate < TODAY) {
-            const baseDateObj = new Date(eventDate + 'T00:00:00');
+            const baseDate = new Date(eventDate);
+            baseDate.setHours(0, 0, 0, 0);
 
             // Calculate next occurrence based on pattern
-            let nextDate = new Date(baseDateObj);
+            let nextDate = new Date(baseDate);
+            const maxIterations = 100; // Safety limit
+            let iterations = 0;
+
             if (t.recurPattern === 'daily') {
-              while (nextDate.toISOString().split('T')[0] < TODAY) {
+              while (formatDateLocal(nextDate) < TODAY && iterations < maxIterations) {
                 nextDate.setDate(nextDate.getDate() + 1);
+                iterations++;
               }
             } else if (t.recurPattern === 'weekly') {
-              while (nextDate.toISOString().split('T')[0] < TODAY) {
+              while (formatDateLocal(nextDate) < TODAY && iterations < maxIterations) {
                 nextDate.setDate(nextDate.getDate() + 7);
+                iterations++;
               }
             } else if (t.recurPattern === 'biweekly') {
-              while (nextDate.toISOString().split('T')[0] < TODAY) {
+              while (formatDateLocal(nextDate) < TODAY && iterations < maxIterations) {
                 nextDate.setDate(nextDate.getDate() + 14);
+                iterations++;
               }
             } else if (t.recurPattern === 'monthly') {
-              while (nextDate.toISOString().split('T')[0] < TODAY) {
+              while (formatDateLocal(nextDate) < TODAY && iterations < maxIterations) {
                 nextDate.setMonth(nextDate.getMonth() + 1);
+                iterations++;
               }
             }
-            eventDate = nextDate.toISOString().split('T')[0];
-            console.log(`Recurring event ${t.title}: original=${t.dueDate.split(' ')[0]}, calculated next=${eventDate}`);
+            eventDate = formatDateLocal(nextDate);
+            // Update the task's dueDate to the calculated date so it displays correctly
+            const timepart = originalDueDate.includes(' ') ? ' ' + originalDueDate.split(' ')[1] : '';
+            t.dueDate = eventDate + timepart;
+            console.log(`Recurring event ${t.title}: original=${originalDueDate.split(' ')[0]}, calculated next=${eventDate} (iterations: ${iterations}), updated dueDate=${t.dueDate}`);
           }
 
           const keep = eventDate >= TODAY;
-          console.log(`Event ${t.title}: eventDate=${eventDate}, TODAY=${TODAY}, keep=${keep}`);
+          console.log(`Event ${t.title}: eventDate=${eventDate}, TODAY=${TODAY}, keep=${keep}, recurPattern=${t.recurPattern}`);
           return keep;
         }
         // Keep all tasks
@@ -3335,6 +3356,14 @@
 
         console.log('DEBUG - Before event date filter:', userTasks.filter(t => t.type === 'event').map(t => ({title: t.title, dueDate: t.dueDate, recurPattern: t.recurPattern})));
 
+        // Helper to format date in local time
+        const formatDateLocal = (date) => {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+
         // Hide past events (both single and recurring)
         // Events are "complete" when today > dueDate, so show only future events
         // For recurring events, calculate the next occurrence if the stored dueDate is past
@@ -3345,32 +3374,45 @@
             }
 
             let eventDate = t.dueDate.split(' ')[0];
+            const originalDueDate = t.dueDate;
+            console.log(`Event ${t.title}: recurPattern=${t.recurPattern}, original eventDate=${eventDate}, TODAY=${TODAY}`);
 
             // For recurring events with past dates, calculate next occurrence
             if (t.recurPattern && t.recurPattern !== 'once' && eventDate < TODAY) {
-              const baseDateObj = new Date(eventDate + 'T00:00:00');
+              const baseDate = new Date(eventDate);
+              baseDate.setHours(0, 0, 0, 0);
 
               // Calculate next occurrence based on pattern
-              let nextDate = new Date(baseDateObj);
+              let nextDate = new Date(baseDate);
+              const maxIterations = 100; // Safety limit
+              let iterations = 0;
+
               if (t.recurPattern === 'daily') {
-                while (nextDate.toISOString().split('T')[0] < TODAY) {
+                while (formatDateLocal(nextDate) < TODAY && iterations < maxIterations) {
                   nextDate.setDate(nextDate.getDate() + 1);
+                  iterations++;
                 }
               } else if (t.recurPattern === 'weekly') {
-                while (nextDate.toISOString().split('T')[0] < TODAY) {
+                while (formatDateLocal(nextDate) < TODAY && iterations < maxIterations) {
                   nextDate.setDate(nextDate.getDate() + 7);
+                  iterations++;
                 }
               } else if (t.recurPattern === 'biweekly') {
-                while (nextDate.toISOString().split('T')[0] < TODAY) {
+                while (formatDateLocal(nextDate) < TODAY && iterations < maxIterations) {
                   nextDate.setDate(nextDate.getDate() + 14);
+                  iterations++;
                 }
               } else if (t.recurPattern === 'monthly') {
-                while (nextDate.toISOString().split('T')[0] < TODAY) {
+                while (formatDateLocal(nextDate) < TODAY && iterations < maxIterations) {
                   nextDate.setMonth(nextDate.getMonth() + 1);
+                  iterations++;
                 }
               }
-              eventDate = nextDate.toISOString().split('T')[0];
-              console.log(`Recurring event ${t.title}: original=${t.dueDate.split(' ')[0]}, calculated next=${eventDate}`);
+              eventDate = formatDateLocal(nextDate);
+              // Update the task's dueDate to the calculated date so it displays correctly
+              const timepart = originalDueDate.includes(' ') ? ' ' + originalDueDate.split(' ')[1] : '';
+              t.dueDate = eventDate + timepart;
+              console.log(`Recurring event ${t.title}: original=${originalDueDate.split(' ')[0]}, calculated next=${eventDate} (iterations: ${iterations}), updated dueDate=${t.dueDate}`);
             }
 
             return eventDate >= TODAY;
