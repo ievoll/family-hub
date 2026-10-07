@@ -3215,6 +3215,8 @@
             // Update the task's dueDate to the calculated date so it displays correctly
             const timepart = originalDueDate.includes(' ') ? ' ' + originalDueDate.split(' ')[1] : '';
             t.dueDate = eventDate + timepart;
+            // Clear endDate so only the future date shows
+            t.endDate = null;
             console.log(`Recurring event ${t.title}: original=${originalDueDate.split(' ')[0]}, calculated next=${eventDate} (iterations: ${iterations}), updated dueDate=${t.dueDate}`);
           }
 
@@ -3412,6 +3414,8 @@
               // Update the task's dueDate to the calculated date so it displays correctly
               const timepart = originalDueDate.includes(' ') ? ' ' + originalDueDate.split(' ')[1] : '';
               t.dueDate = eventDate + timepart;
+              // Clear endDate so only the future date shows
+              t.endDate = null;
               console.log(`Recurring event ${t.title}: original=${originalDueDate.split(' ')[0]}, calculated next=${eventDate} (iterations: ${iterations}), updated dueDate=${t.dueDate}`);
             }
 
