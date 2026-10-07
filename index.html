@@ -307,6 +307,23 @@
       box-shadow: 0 0 0 2px var(--accent-light);
     }
 
+    /* Make date picker calendar icon visible on dark mode */
+    input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1) brightness(1.2);
+      cursor: pointer;
+    }
+
+    /* Dark mode override for better calendar icon visibility */
+    @media (prefers-color-scheme: dark) {
+      input[type="date"]::-webkit-calendar-picker-indicator {
+        filter: invert(1) brightness(1.5);
+      }
+    }
+
+    :root[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1) brightness(1.5);
+    }
+
     button {
       padding: 8px 14px;
       background: var(--accent);
@@ -1636,7 +1653,7 @@
   <!-- Edit Modal -->
   <div class="modal" id="edit-modal">
     <div class="modal-content" style="max-width: 500px;">
-      <div class="modal-header">Edit Task</div>
+      <div class="modal-header">Edit Item</div>
 
       <!-- Title -->
       <div style="margin-bottom: 24px;">
@@ -3139,16 +3156,16 @@
 
       myTasks = myTasks.filter(t => !tasksToRemove.has(t.id));
 
-      // Hide past single events from items page (after recurring logic has run)
+      // Hide past events from items page (after recurring logic has run)
       myTasks = myTasks.filter(t => {
-        if (t.type === 'event' && !t.recurPattern) {
-          // Only filter out non-recurring events that are in the past
+        if (t.type === 'event') {
+          // Filter out all events (recurring and non-recurring) that are in the past
           if (t.dueDate) {
             const eventDate = t.dueDate.split(' ')[0];
             return eventDate >= TODAY;
           }
         }
-        return true; // Keep all tasks and recurring events
+        return true; // Keep all tasks
       });
 
       myTasks.sort((a, b) => parseTaskDate(a.dueDate) - parseTaskDate(b.dueDate));
@@ -3276,16 +3293,16 @@
 
         userTasks = userTasks.filter(t => !tasksToRemove.has(t.id));
 
-        // Hide past single events from items page (after recurring logic has run)
+        // Hide past events from items page (after recurring logic has run)
         userTasks = userTasks.filter(t => {
-          if (t.type === 'event' && !t.recurPattern) {
-            // Only filter out non-recurring events that are in the past
+          if (t.type === 'event') {
+            // Filter out all events (recurring and non-recurring) that are in the past
             if (t.dueDate) {
               const eventDate = t.dueDate.split(' ')[0];
               return eventDate >= TODAY;
             }
           }
-          return true; // Keep all tasks and recurring events
+          return true; // Keep all tasks
         });
 
         userTasks.sort((a, b) => parseTaskDate(a.dueDate) - parseTaskDate(b.dueDate));
