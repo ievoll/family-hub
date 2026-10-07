@@ -310,10 +310,6 @@
     /* Date picker calendar icon styling */
     input[type="date"]::-webkit-calendar-picker-indicator {
       cursor: pointer;
-    }
-
-    /* Light mode: keep default dark icon */
-    :root:not([data-theme="dark"]) input[type="date"]::-webkit-calendar-picker-indicator {
       filter: none;
     }
 
@@ -324,8 +320,14 @@
       }
     }
 
+    /* Explicit dark theme override */
     :root[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
       filter: invert(1) brightness(1.5);
+    }
+
+    /* Explicit light theme override */
+    :root[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: none;
     }
 
     button {
@@ -2288,7 +2290,6 @@
       const endDate = document.getElementById('task-end-date').value || null;
       const recur = document.getElementById('task-recur').value;
       const occurrences = recur !== 'once' ? parseInt(document.getElementById('task-occurrences').value) : null;
-      console.log('[addTask] Form values:', {title, itemType, category, dueDate, recur});
 
       // Format due date with time if provided
       const formattedDueDate = dueDate + (dueHour || dueMinute ? ` ${String(dueHour || '00').padStart(2, '0')}:${String(dueMinute || '00').padStart(2, '0')}` : '');
@@ -2381,9 +2382,7 @@
       updateRecurringFields();
 
       saveData();
-      console.log('[addTask] Before renderAll, tasks:', tasks.length);
       renderAll();
-      console.log('[addTask] After renderAll');
       showTaskSuccess(`✓ ${itemType === 'event' ? 'Event' : 'Task'} created!`);
       } catch (error) {
         console.error('[addTask] Error:', error);
@@ -3161,8 +3160,6 @@
 
       myTasks = myTasks.filter(t => !tasksToRemove.has(t.id));
 
-      console.log('DEBUG - Before event date filter:', myTasks.filter(t => t.type === 'event').map(t => ({title: t.title, dueDate: t.dueDate, recurPattern: t.recurPattern})));
-
       // Helper to format date in local time
       const formatDateLocal = (date) => {
         const year = date.getFullYear();
@@ -3182,7 +3179,6 @@
 
           let eventDate = t.dueDate.split(' ')[0];
           const originalDueDate = t.dueDate;
-          console.log(`Event ${t.title}: recurPattern=${t.recurPattern}, original eventDate=${eventDate}, TODAY=${TODAY}`);
 
           // For recurring events with past dates, calculate next occurrence
           if (t.recurPattern && t.recurPattern !== 'once' && eventDate < TODAY) {
@@ -3221,18 +3217,14 @@
             t.dueDate = eventDate + timepart;
             // Clear endDate so only the future date shows
             t.endDate = null;
-            console.log(`Recurring event ${t.title}: original=${originalDueDate.split(' ')[0]}, calculated next=${eventDate} (iterations: ${iterations}), updated dueDate=${t.dueDate}`);
           }
 
           const keep = eventDate >= TODAY;
-          console.log(`Event ${t.title}: eventDate=${eventDate}, TODAY=${TODAY}, keep=${keep}, recurPattern=${t.recurPattern}`);
           return keep;
         }
         // Keep all tasks
         return true;
       });
-
-      console.log('DEBUG - After event date filter:', myTasks.filter(t => t.type === 'event').map(t => ({title: t.title, dueDate: t.dueDate})));
 
       myTasks.sort((a, b) => parseTaskDate(a.dueDate) - parseTaskDate(b.dueDate));
       
@@ -3360,8 +3352,6 @@
 
         userTasks = userTasks.filter(t => !tasksToRemove.has(t.id));
 
-        console.log('DEBUG - Before event date filter:', userTasks.filter(t => t.type === 'event').map(t => ({title: t.title, dueDate: t.dueDate, recurPattern: t.recurPattern})));
-
         // Helper to format date in local time
         const formatDateLocal = (date) => {
           const year = date.getFullYear();
@@ -3381,7 +3371,6 @@
 
             let eventDate = t.dueDate.split(' ')[0];
             const originalDueDate = t.dueDate;
-            console.log(`Event ${t.title}: recurPattern=${t.recurPattern}, original eventDate=${eventDate}, TODAY=${TODAY}`);
 
             // For recurring events with past dates, calculate next occurrence
             if (t.recurPattern && t.recurPattern !== 'once' && eventDate < TODAY) {
@@ -3420,7 +3409,6 @@
               t.dueDate = eventDate + timepart;
               // Clear endDate so only the future date shows
               t.endDate = null;
-              console.log(`Recurring event ${t.title}: original=${originalDueDate.split(' ')[0]}, calculated next=${eventDate} (iterations: ${iterations}), updated dueDate=${t.dueDate}`);
             }
 
             return eventDate >= TODAY;
