@@ -3159,13 +3159,19 @@
       // Hide past events from items page (after recurring logic has run)
       myTasks = myTasks.filter(t => {
         if (t.type === 'event') {
-          // Filter out all events (recurring and non-recurring) that are in the past
           if (t.dueDate) {
             const eventDate = t.dueDate.split(' ')[0];
-            return eventDate >= TODAY;
+            // For all events, filter out if in the past
+            if (eventDate < TODAY) {
+              // But keep uncompleted recurring events (the next active occurrence)
+              if (t.recurPattern && t.recurPattern !== 'once' && !t.completed) {
+                return true; // Keep uncompleted recurring events even if past date on record
+              }
+              return false; // Filter out: past single events, past completed recurring events
+            }
           }
         }
-        return true; // Keep all tasks
+        return true; // Keep all tasks and future events
       });
 
       myTasks.sort((a, b) => parseTaskDate(a.dueDate) - parseTaskDate(b.dueDate));
@@ -3296,13 +3302,19 @@
         // Hide past events from items page (after recurring logic has run)
         userTasks = userTasks.filter(t => {
           if (t.type === 'event') {
-            // Filter out all events (recurring and non-recurring) that are in the past
             if (t.dueDate) {
               const eventDate = t.dueDate.split(' ')[0];
-              return eventDate >= TODAY;
+              // For all events, filter out if in the past
+              if (eventDate < TODAY) {
+                // But keep uncompleted recurring events (the next active occurrence)
+                if (t.recurPattern && t.recurPattern !== 'once' && !t.completed) {
+                  return true; // Keep uncompleted recurring events even if past date on record
+                }
+                return false; // Filter out: past single events, past completed recurring events
+              }
             }
           }
-          return true; // Keep all tasks
+          return true; // Keep all tasks and future events
         });
 
         userTasks.sort((a, b) => parseTaskDate(a.dueDate) - parseTaskDate(b.dueDate));
