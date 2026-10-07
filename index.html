@@ -3156,27 +3156,20 @@
 
       myTasks = myTasks.filter(t => !tasksToRemove.has(t.id));
 
-      // Show only non-overdue events (eventDate >= TODAY)
-      // Each recurring instance has its actual occurrence date, so use that for filtering
-      console.log('BEFORE event date filter:', myTasks.filter(t => t.type === 'event').map(t => ({title: t.title, type: t.type, dueDate: t.dueDate, recurPattern: t.recurPattern, completed: t.completed})));
-      console.log('TODAY constant:', TODAY);
-
+      // Hide past events (both single and recurring)
+      // Events are "complete" when today > dueDate, so show only future events
       myTasks = myTasks.filter(t => {
         if (t.type === 'event') {
+          // Filter all events by date
           if (t.dueDate) {
             const eventDate = t.dueDate.split(' ')[0];
-            const keep = eventDate >= TODAY;
-            console.log('Event filter:', {title: t.title, dueDate: t.dueDate, eventDate, TODAY, keep});
-            return keep;
+            return eventDate >= TODAY;
           }
-          console.log('Event no dueDate:', t.title);
-          return false; // Hide if no dueDate
+          return false;
         }
-        // Keep all tasks (non-events)
+        // Keep all tasks
         return true;
       });
-
-      console.log('AFTER event date filter:', myTasks.filter(t => t.type === 'event').map(t => ({title: t.title, dueDate: t.dueDate})));
 
       myTasks.sort((a, b) => parseTaskDate(a.dueDate) - parseTaskDate(b.dueDate));
       
@@ -3303,28 +3296,20 @@
 
         userTasks = userTasks.filter(t => !tasksToRemove.has(t.id));
 
-        // Show only non-overdue events (eventDate >= TODAY)
-        // Each recurring instance has its actual occurrence date, so use that for filtering
-        console.log('ALL TASKS - BEFORE event date filter:', userTasks.filter(t => t.type === 'event').map(t => ({title: t.title, dueDate: t.dueDate, recurPattern: t.recurPattern, completed: t.completed})));
-
+        // Hide past events (both single and recurring)
+        // Events are "complete" when today > dueDate, so show only future events
         userTasks = userTasks.filter(t => {
           if (t.type === 'event') {
+            // Filter all events by date
             if (t.dueDate) {
               const eventDate = t.dueDate.split(' ')[0];
-              const keep = eventDate >= TODAY;
-              if (!keep) {
-                console.log('ALL TASKS - filtering out event:', {title: t.title, dueDate: t.dueDate, eventDate, TODAY});
-              }
-              return keep;
+              return eventDate >= TODAY;
             }
-            console.log('ALL TASKS - Event no dueDate:', t.title);
-            return false; // Hide if no dueDate
+            return false;
           }
-          // Keep all tasks (non-events)
+          // Keep all tasks
           return true;
         });
-
-        console.log('ALL TASKS - AFTER event date filter:', userTasks.filter(t => t.type === 'event').map(t => ({title: t.title, dueDate: t.dueDate})));
 
         userTasks.sort((a, b) => parseTaskDate(a.dueDate) - parseTaskDate(b.dueDate));
 
