@@ -3117,11 +3117,12 @@
       });
 
       // For recurring tasks, show only the next uncompleted instance in each series
+      // (Events don't use this logic - they're filtered by date only)
       const seriesMap = {};
       myTasks = myTasks.filter(t => {
         const isRecurring = t.recurPattern && t.recurPattern !== 'once';
-        if (!isRecurring) {
-          return true; // Keep all single tasks
+        if (!isRecurring || t.type === 'event') {
+          return true; // Keep all single tasks and all events (will filter by date later)
         }
 
         // Create a series key: title + assignedBy + recurPattern + maxOccurrences
@@ -3134,7 +3135,7 @@
         return true; // Temporarily keep all
       });
 
-      // Now filter to keep only the next uncompleted in each series
+      // Now filter to keep only the next uncompleted in each series (tasks only)
       const tasksToRemove = new Set();
       Object.values(seriesMap).forEach(series => {
         // Find the first uncompleted task in occurrence order
@@ -3156,6 +3157,8 @@
 
       myTasks = myTasks.filter(t => !tasksToRemove.has(t.id));
 
+      console.log('DEBUG - Before event date filter:', myTasks.filter(t => t.type === 'event').map(t => ({title: t.title, dueDate: t.dueDate, recurPattern: t.recurPattern})));
+
       // Hide past events (both single and recurring)
       // Events are "complete" when today > dueDate, so show only future events
       myTasks = myTasks.filter(t => {
@@ -3163,13 +3166,18 @@
           // Filter all events by date
           if (t.dueDate) {
             const eventDate = t.dueDate.split(' ')[0];
-            return eventDate >= TODAY;
+            const keep = eventDate >= TODAY;
+            console.log(`Event ${t.title}: dueDate=${t.dueDate}, eventDate=${eventDate}, TODAY=${TODAY}, keep=${keep}`);
+            return keep;
           }
+          console.log(`Event ${t.title}: no dueDate`);
           return false;
         }
         // Keep all tasks
         return true;
       });
+
+      console.log('DEBUG - After event date filter:', myTasks.filter(t => t.type === 'event').map(t => ({title: t.title, dueDate: t.dueDate})));
 
       myTasks.sort((a, b) => parseTaskDate(a.dueDate) - parseTaskDate(b.dueDate));
       
@@ -3257,11 +3265,12 @@
         });
 
         // For recurring tasks, show only the next uncompleted instance in each series
+        // (Events don't use this logic - they're filtered by date only)
         const seriesMap = {};
         userTasks = userTasks.filter(t => {
           const isRecurring = t.recurPattern && t.recurPattern !== 'once';
-          if (!isRecurring) {
-            return true; // Keep all single tasks
+          if (!isRecurring || t.type === 'event') {
+            return true; // Keep all single tasks and all events (will filter by date later)
           }
 
           // Create a series key: title + assignedBy + recurPattern + maxOccurrences
@@ -3274,7 +3283,7 @@
           return true; // Temporarily keep all
         });
 
-        // Now filter to keep only the next uncompleted in each series
+        // Now filter to keep only the next uncompleted in each series (tasks only)
         const tasksToRemove = new Set();
         Object.values(seriesMap).forEach(series => {
           // Find the first uncompleted task in occurrence order
@@ -3295,6 +3304,8 @@
         });
 
         userTasks = userTasks.filter(t => !tasksToRemove.has(t.id));
+
+        console.log('DEBUG - Before event date filter:', userTasks.filter(t => t.type === 'event').map(t => ({title: t.title, dueDate: t.dueDate, recurPattern: t.recurPattern})));
 
         // Hide past events (both single and recurring)
         // Events are "complete" when today > dueDate, so show only future events
