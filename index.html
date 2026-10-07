@@ -3157,15 +3157,14 @@
       myTasks = myTasks.filter(t => !tasksToRemove.has(t.id));
 
       // Show only non-overdue events (eventDate >= TODAY)
+      // Each recurring instance has its actual occurrence date, so use that for filtering
       myTasks = myTasks.filter(t => {
         if (t.type === 'event') {
           if (t.dueDate) {
             const eventDate = t.dueDate.split(' ')[0];
-            // Keep only if event date is today or in the future
             return eventDate >= TODAY;
           }
-          // If no dueDate, hide it
-          return false;
+          return false; // Hide if no dueDate
         }
         // Keep all tasks (non-events)
         return true;
@@ -3297,15 +3296,14 @@
         userTasks = userTasks.filter(t => !tasksToRemove.has(t.id));
 
         // Show only non-overdue events (eventDate >= TODAY)
+        // Each recurring instance has its actual occurrence date, so use that for filtering
         userTasks = userTasks.filter(t => {
           if (t.type === 'event') {
             if (t.dueDate) {
               const eventDate = t.dueDate.split(' ')[0];
-              // Keep only if event date is today or in the future
               return eventDate >= TODAY;
             }
-            // If no dueDate, hide it
-            return false;
+            return false; // Hide if no dueDate
           }
           // Keep all tasks (non-events)
           return true;
