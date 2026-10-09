@@ -1900,7 +1900,6 @@
     let shopCart = {}; // { itemId: quantity }
     let shopSpending = {}; // { userName: totalSpentWB }
     let earnedWBPerUser = {}; // { userName: totalEarnedWB } - tracks earned WB permanently
-    let completedTasksPerUser = {}; // { userName: totalCompletedTasks } - tracks completed task counts permanently
     let purchaseHistory = []; // Array of { userId, itemId, quantity, cost, date }
     let claimedItems = []; // Array of { userId, itemId, quantity, cost, date, claimedAt, id }
     let deletedTaskStats = []; // Array of { completedAt, size, assignedTo, wb } - permanent record of deleted task stats
@@ -1910,7 +1909,6 @@
     Object.keys(users).forEach(userId => {
       shopSpending[userId] = 0;
       earnedWBPerUser[userId] = 0;
-      completedTasksPerUser[userId] = 0;
     });
 
     // Filter state
@@ -1987,7 +1985,6 @@
           tasks = data.tasks || [];
           shopSpending = data.shopSpending || {};
           earnedWBPerUser = data.earnedWBPerUser || {};
-          completedTasksPerUser = data.completedTasksPerUser || {};
           purchaseHistory = data.purchaseHistory || [];
           claimedItems = data.claimedItems || [];
           deletedTaskStats = data.deletedTaskStats || [];
@@ -1995,16 +1992,13 @@
           // Load notes for all users
           notes = data.notes || {};
 
-          // Ensure all users have spending, earning, and completed task entries
+          // Ensure all users have spending and earning entries
           Object.keys(users).forEach(userId => {
             if (!(userId in shopSpending)) {
               shopSpending[userId] = 0;
             }
             if (!(userId in earnedWBPerUser)) {
               earnedWBPerUser[userId] = 0;
-            }
-            if (!(userId in completedTasksPerUser)) {
-              completedTasksPerUser[userId] = 0;
             }
           });
 
@@ -2017,20 +2011,6 @@
                 const wbReward = sizes[task.size].wb;
                 assignees.forEach(assignee => {
                   earnedWBPerUser[assignee] = (earnedWBPerUser[assignee] || 0) + wbReward;
-                });
-              }
-            });
-            saveData(); // Save corrected data
-          }
-
-          // If completedTasksPerUser is empty, populate it from completed tasks
-          const hasCompletedData = Object.values(completedTasksPerUser).some(v => v > 0);
-          if (!hasCompletedData && tasks.length > 0) {
-            tasks.forEach(task => {
-              if (task.completed && task.type !== 'event') {
-                const assignees = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo];
-                assignees.forEach(assignee => {
-                  completedTasksPerUser[assignee] = (completedTasksPerUser[assignee] || 0) + 1;
                 });
               }
             });
@@ -2071,7 +2051,6 @@
         tasks: cleanTasks,
         shopSpending: shopSpending,
         earnedWBPerUser: earnedWBPerUser,
-        completedTasksPerUser: completedTasksPerUser,
         purchaseHistory: purchaseHistory,
         claimedItems: claimedItems,
         deletedTaskStats: deletedTaskStats,
@@ -2101,14 +2080,12 @@
       shopCart = {};
       shopSpending = {};
       earnedWBPerUser = {};
-      completedTasksPerUser = {};
       purchaseHistory = [];
       claimedItems = [];
       notes = {};
       Object.keys(users).forEach(userId => {
         shopSpending[userId] = 0;
         earnedWBPerUser[userId] = 0;
-        completedTasksPerUser[userId] = 0;
       });
       database.ref('familyHub').remove().then(() => {
         closeClearDataModal();
@@ -2412,7 +2389,6 @@
         const wbReward = sizes[newTask.size].wb;
         assignedTo.forEach(assignee => {
           earnedWBPerUser[assignee] = (earnedWBPerUser[assignee] || 0) + wbReward;
-          completedTasksPerUser[assignee] = (completedTasksPerUser[assignee] || 0) + 1;
         });
       }
 
@@ -2619,8 +2595,6 @@
           const wbReward = sizes[task.size].wb;
           assignees.forEach(assignee => {
             earnedWBPerUser[assignee] = (earnedWBPerUser[assignee] || 0) + wbReward;
-            // Also increment the permanent completed task count
-            completedTasksPerUser[assignee] = (completedTasksPerUser[assignee] || 0) + 1;
           });
           task.wbAwarded = true;
         }
@@ -2632,8 +2606,6 @@
           const wbReward = sizes[task.size].wb;
           assignees.forEach(assignee => {
             earnedWBPerUser[assignee] = Math.max(0, (earnedWBPerUser[assignee] || 0) - wbReward);
-            // Also decrement the permanent completed task count
-            completedTasksPerUser[assignee] = Math.max(0, (completedTasksPerUser[assignee] || 0) - 1);
           });
           task.wbAwarded = false;
         }
@@ -3675,11 +3647,10 @@
         }
       });
 
-      // For "all time", ensure WB and task completion totals match permanent records (use them as authoritative)
+      // For "all time", ensure WB matches permanent records (use them as authoritative)
       if (isAllTime) {
         Object.keys(users).forEach(userId => {
           scores[userId].wb = earnedWBPerUser[userId] || 0;
-          scores[userId].tasksCompleted = completedTasksPerUser[userId] || 0;
         });
       }
 
@@ -3695,7 +3666,6 @@
             <tr>
               <th>Rank</th>
               <th>Person</th>
-              <th>Tasks</th>
               <th>Wuzzabucks</th>
             </tr>
           </thead>
@@ -3706,63 +3676,35 @@
               <tr style="background-color: ${personColors[score.userId]};">
                 <td><span class="rank-badge rank-${score.rank}">${score.rank}</span></td>
                 <td><strong>${score.name}</strong></td>
-                <td>${score.tasksCompleted}</td>
                 <td class="wuzzabucks-total">${score.wb} WB</td>
               </tr>
             `}).join('')}
           </tbody>
         </table>`;
 
-      // Build animal size breakdown table
-      const userList = Object.keys(users);
+      // Build task size reference table
       const sizeKeys = Object.keys(sizes);
 
       let animalTable = `<table class="animal-breakdown-table" style="margin-top: 32px;">
         <thead>
           <tr>
             <th>Task Size</th>
-            ${userList.map(userId => `<th>${users[userId].name}</th>`).join('')}
-            <th>Total</th>
+            <th>Wuzzabucks</th>
           </tr>
         </thead>
         <tbody>`;
 
       sizeKeys.forEach(sizeKey => {
         const sizeInfo = sizes[sizeKey];
-        let rowTotal = 0;
-        const cells = userList.map(userId => {
-          const count = animalCounts[sizeKey][userId];
-          rowTotal += count;
-          return `<td>${count}</td>`;
-        }).join('');
-
         const textColor = sizeKey === 'ant' ? 'color: #1c1917;' : 'color: white;';
         animalTable += `
           <tr style="background-color: var(--size-${sizeKey}); ${textColor}">
-            <td><strong>${sizeInfo.label}<br>${sizeInfo.wb} WB</strong></td>
-            ${cells}
-            <td><strong>${rowTotal}</strong></td>
+            <td><strong>${sizeInfo.label}</strong></td>
+            <td><strong>${sizeInfo.wb} WB</strong></td>
           </tr>`;
       });
 
-      // Add Total row
-      let totalCells = '';
-      let grandTotal = 0;
-      userList.forEach(userId => {
-        let userTotal = 0;
-        sizeKeys.forEach(sizeKey => {
-          userTotal += animalCounts[sizeKey][userId];
-        });
-        grandTotal += userTotal;
-        totalCells += `<td><strong>${userTotal}</strong></td>`;
-      });
-
       animalTable += `
-          <tr style="background-color: var(--bg-tertiary); font-weight: 600;">
-            <td><strong>Total</strong></td>
-            ${totalCells}
-            <td><strong>${grandTotal}</strong></td>
-          </tr>
         </tbody>
       </table>`;
 
