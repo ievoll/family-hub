@@ -2022,6 +2022,20 @@
             });
             saveData(); // Save corrected data
           }
+
+          // If completedTasksPerUser is empty, populate it from completed tasks
+          const hasCompletedData = Object.values(completedTasksPerUser).some(v => v > 0);
+          if (!hasCompletedData && tasks.length > 0) {
+            tasks.forEach(task => {
+              if (task.completed && task.type !== 'event') {
+                const assignees = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo];
+                assignees.forEach(assignee => {
+                  completedTasksPerUser[assignee] = (completedTasksPerUser[assignee] || 0) + 1;
+                });
+              }
+            });
+            saveData(); // Save corrected data
+          }
         } else {
           // Initialize with empty data structure if nothing exists
           Object.keys(users).forEach(userId => {
