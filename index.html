@@ -1361,8 +1361,11 @@
                 </div>
               </div>
               <div class="filter-group" id="calendar-categories-filter">
-                <div class="filter-label">Categories</div>
-                <div class="category-filters" id="calendar-category-filters"></div>
+                <div class="filter-label" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none;" onclick="toggleCategoryFilter()">
+                  <span>Categories</span>
+                  <span id="calendar-category-toggle" style="font-size: 12px; color: var(--text-tertiary);">▶</span>
+                </div>
+                <div class="category-filters" id="calendar-category-filters" style="display: none;"></div>
               </div>
             </div>
 
@@ -1845,10 +1848,10 @@
     const database = firebase.database();
 
     const users = {
-      ian: { name: 'Ian', role: 'admin' },
-      cindy: { name: 'Cindy', role: 'admin' },
-      ivy: { name: 'Ivy', role: 'member' },
-      angus: { name: 'Angus', role: 'member' }
+      ian: { name: 'Ian', role: 'admin', color: '#3b82f6' },      // Blue
+      cindy: { name: 'Cindy', role: 'admin', color: '#ec4899' },  // Pink
+      ivy: { name: 'Ivy', role: 'member', color: '#8b5cf6' },     // Purple
+      angus: { name: 'Angus', role: 'member', color: '#f97316' }  // Orange
     };
 
     // Map email addresses to user IDs
@@ -2873,6 +2876,18 @@
       renderCalendar();
     }
 
+    function toggleCategoryFilter() {
+      const filterDiv = document.getElementById('calendar-category-filters');
+      const toggleIcon = document.getElementById('calendar-category-toggle');
+      if (filterDiv.style.display === 'none') {
+        filterDiv.style.display = 'block';
+        toggleIcon.textContent = '▼';
+      } else {
+        filterDiv.style.display = 'none';
+        toggleIcon.textContent = '▶';
+      }
+    }
+
     function toggleCalendarShowAll() {
       // Non-admins can't toggle show all
       if (!isAdmin()) {
@@ -3147,7 +3162,22 @@
               const timeDisplay = timeStr ? `<div class="calendar-task-time">${timeStr}${durationStr}</div>` : '';
               const assignees = Array.isArray(t.assignedTo) ? t.assignedTo : [t.assignedTo];
               const firstAssignee = assignees[0] || 'ian';
-              return `<div class="calendar-task ${t.category}" style="cursor: pointer;" onclick="navigateToPersonItems('${firstAssignee}')"><span class="calendar-task-title">${escapeHtml(t.title)}</span>${timeDisplay}<div class="calendar-task-cat">${categories[t.category]}</div></div>`;
+
+              // Create gradient for multiple assignees
+              let bgStyle;
+              let borderColor;
+              if (assignees.length > 1) {
+                const colors = assignees.map(a => users[a]?.color || '#9ca3af').slice(0, 4);
+                const gradientStops = colors.map((c, i) => `${c}20 ${Math.round((i / (colors.length - 1)) * 100)}%`).join(', ');
+                bgStyle = `linear-gradient(to right, ${gradientStops})`;
+                borderColor = colors[0]; // First assignee's color for border
+              } else {
+                const userColor = users[firstAssignee]?.color || '#9ca3af';
+                bgStyle = userColor + '20';
+                borderColor = userColor;
+              }
+
+              return `<div class="calendar-task" style="background: ${bgStyle}; border-left: 4px solid ${borderColor}; cursor: pointer;" onclick="navigateToPersonItems('${firstAssignee}')"><span class="calendar-task-title">${escapeHtml(t.title)}</span>${timeDisplay}<div class="calendar-task-cat">${categories[t.category]}</div></div>`;
             }).join('')}
           </div>
         </div>`;
