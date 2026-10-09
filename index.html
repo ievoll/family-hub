@@ -1827,6 +1827,20 @@
     </div>
   </div>
 
+  <!-- Edit Recurring Task Modal -->
+  <div class="modal" id="edit-recurring-task-modal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">Edit Recurring Item</div>
+      <p style="color: var(--text-secondary); margin-bottom: 16px;">This is a recurring item. How would you like to apply these changes?</p>
+      <div class="modal-actions" style="flex-direction: column; gap: 8px;">
+        <button style="background: var(--accent); color: white;" onclick="applyEditToThisOnly()">This Event Only</button>
+        <button style="background: var(--accent); color: white;" onclick="applyEditToThisAndFollowing()">This and All Following</button>
+        <button style="background: var(--accent); color: white;" onclick="applyEditToAllEvents()">All Events in Series</button>
+        <button class="btn-secondary" onclick="closeEditRecurringModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-database-compat.js"></script>
@@ -1897,6 +1911,7 @@
     let currentDate = new Date();
     let tasks = [];
     let editingTaskId = null;
+    let pendingEditChanges = null; // Store changes temporarily for recurring task confirmation
     let shopCart = {}; // { itemId: quantity }
     let shopSpending = {}; // { userName: totalSpentWB }
     let earnedWBPerUser = {}; // { userName: totalEarnedWB } - tracks earned WB permanently
@@ -2532,48 +2547,148 @@
       const task = tasks.find(t => t.id === editingTaskId);
       if (!task) return;
 
-      task.title = document.getElementById('edit-task-title').value.trim();
-      task.category = document.getElementById('edit-task-category').value;
-      task.size = document.getElementById('edit-task-size').value;
-      task.recurPattern = document.getElementById('edit-task-recur').value;
+      // Collect all changes
+      const newTitle = document.getElementById('edit-task-title').value.trim();
+      const newCategory = document.getElementById('edit-task-category').value;
+      const newSize = document.getElementById('edit-task-size').value;
+      const newRecurPattern = document.getElementById('edit-task-recur').value;
 
       // Get multiple assignments from checkboxes
       const checkedBoxes = Array.from(document.querySelectorAll('.edit-task-assign-checkbox:checked'));
-      let assignedTo = checkedBoxes.map(cb => cb.value);
+      let newAssignedTo = checkedBoxes.map(cb => cb.value);
 
       // Handle "All" option
-      if (assignedTo.includes('all')) {
-        assignedTo = Object.keys(users);
+      if (newAssignedTo.includes('all')) {
+        newAssignedTo = Object.keys(users);
       }
 
       // Ensure at least one person is assigned
-      if (assignedTo.length === 0) {
+      if (newAssignedTo.length === 0) {
         showTaskError('Please assign to at least one person');
         return;
       }
-
-      task.assignedTo = assignedTo;
 
       // Format due date with time if provided
       const dueDate = document.getElementById('edit-task-due-date').value;
       const dueHour = document.getElementById('edit-task-due-hour').value;
       const dueMinute = document.getElementById('edit-task-due-minute').value;
-      const formattedDueDate = dueDate + (dueHour || dueMinute ? ` ${String(dueHour || '00').padStart(2, '0')}:${String(dueMinute || '00').padStart(2, '0')}` : '');
-      task.dueDate = formattedDueDate;
+      const newDueDate = dueDate + (dueHour || dueMinute ? ` ${String(dueHour || '00').padStart(2, '0')}:${String(dueMinute || '00').padStart(2, '0')}` : '');
 
       // Format end date with time if provided
       const endDate = document.getElementById('edit-task-end-date').value;
-      if (endDate) {
-        task.endDate = endDate;
-      } else {
-        task.endDate = null;
-      }
+      const newEndDate = endDate || null;
 
       // Format and save duration
       const durationHour = document.getElementById('edit-task-duration-hour').value;
       const durationMinute = document.getElementById('edit-task-duration-minute').value;
-      task.duration = (durationHour || durationMinute) ? `${durationHour || '0'}:${String(durationMinute || '0').padStart(2, '0')}` : null;
+      const newDuration = (durationHour || durationMinute) ? `${durationHour || '0'}:${String(durationMinute || '0').padStart(2, '0')}` : null;
 
+      // Check if it's a recurring task
+      const isRecurring = task.recurPattern && task.recurPattern !== 'once';
+
+      if (isRecurring) {
+        // Store changes and show recurring edit modal
+        pendingEditChanges = {
+          title: newTitle,
+          category: newCategory,
+          size: newSize,
+          recurPattern: newRecurPattern,
+          assignedTo: newAssignedTo,
+          dueDate: newDueDate,
+          endDate: newEndDate,
+          duration: newDuration
+        };
+        document.getElementById('edit-recurring-task-modal').classList.add('active');
+      } else {
+        // Apply changes directly for non-recurring tasks
+        task.title = newTitle;
+        task.category = newCategory;
+        task.size = newSize;
+        task.recurPattern = newRecurPattern;
+        task.assignedTo = newAssignedTo;
+        task.dueDate = newDueDate;
+        task.endDate = newEndDate;
+        task.duration = newDuration;
+
+        saveData();
+        closeEditModal();
+        renderAll();
+      }
+    }
+
+    function closeEditRecurringModal() {
+      document.getElementById('edit-recurring-task-modal').classList.remove('active');
+      pendingEditChanges = null;
+    }
+
+    function applyEditToThisOnly() {
+      if (!editingTaskId || !pendingEditChanges) return;
+      const task = tasks.find(t => t.id === editingTaskId);
+      if (!task) return;
+
+      // Apply changes only to this task
+      task.title = pendingEditChanges.title;
+      task.category = pendingEditChanges.category;
+      task.size = pendingEditChanges.size;
+      task.recurPattern = pendingEditChanges.recurPattern;
+      task.assignedTo = pendingEditChanges.assignedTo;
+      task.dueDate = pendingEditChanges.dueDate;
+      task.endDate = pendingEditChanges.endDate;
+      task.duration = pendingEditChanges.duration;
+
+      closeEditRecurringModal();
+      saveData();
+      closeEditModal();
+      renderAll();
+    }
+
+    function applyEditToThisAndFollowing() {
+      if (!editingTaskId || !pendingEditChanges) return;
+      const task = tasks.find(t => t.id === editingTaskId);
+      if (!task) return;
+
+      const currentOccurrence = task.occurrenceNumber || 1;
+
+      // Apply changes to this task and all following occurrences with the same recurPattern
+      tasks.forEach(t => {
+        if (t.recurPattern === task.recurPattern && (t.occurrenceNumber || 1) >= currentOccurrence) {
+          t.title = pendingEditChanges.title;
+          t.category = pendingEditChanges.category;
+          t.size = pendingEditChanges.size;
+          t.recurPattern = pendingEditChanges.recurPattern;
+          t.assignedTo = pendingEditChanges.assignedTo;
+          t.dueDate = pendingEditChanges.dueDate;
+          t.endDate = pendingEditChanges.endDate;
+          t.duration = pendingEditChanges.duration;
+        }
+      });
+
+      closeEditRecurringModal();
+      saveData();
+      closeEditModal();
+      renderAll();
+    }
+
+    function applyEditToAllEvents() {
+      if (!editingTaskId || !pendingEditChanges) return;
+      const task = tasks.find(t => t.id === editingTaskId);
+      if (!task) return;
+
+      // Apply changes to all tasks with the same recurPattern
+      tasks.forEach(t => {
+        if (t.recurPattern === task.recurPattern) {
+          t.title = pendingEditChanges.title;
+          t.category = pendingEditChanges.category;
+          t.size = pendingEditChanges.size;
+          t.recurPattern = pendingEditChanges.recurPattern;
+          t.assignedTo = pendingEditChanges.assignedTo;
+          t.dueDate = pendingEditChanges.dueDate;
+          t.endDate = pendingEditChanges.endDate;
+          t.duration = pendingEditChanges.duration;
+        }
+      });
+
+      closeEditRecurringModal();
       saveData();
       closeEditModal();
       renderAll();
