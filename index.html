@@ -1744,12 +1744,16 @@
 
       <!-- Assigned To -->
       <div style="margin-bottom: 24px;">
-        <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Assigned To</label>
-        <select id="edit-task-assignee" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
-          <option value="ian">Ian</option>
-          <option value="cindy">Cindy</option>
-          <option value="ivy">Ivy</option>
-        </select>
+        <fieldset style="border: 1px solid var(--border); border-radius: 6px; padding: 12px; background: var(--bg-secondary);">
+          <legend style="padding: 0 8px;">Assigned To:</legend>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="font-size: 14px; cursor: pointer; display: flex; align-items: center;"><input type="checkbox" class="edit-task-assign-checkbox" value="all" style="margin-right: 8px;"> All</label>
+            <label style="font-size: 14px; cursor: pointer; display: flex; align-items: center;"><input type="checkbox" class="edit-task-assign-checkbox" value="ian" style="margin-right: 8px;"> Ian</label>
+            <label style="font-size: 14px; cursor: pointer; display: flex; align-items: center;"><input type="checkbox" class="edit-task-assign-checkbox" value="cindy" style="margin-right: 8px;"> Cindy</label>
+            <label style="font-size: 14px; cursor: pointer; display: flex; align-items: center;"><input type="checkbox" class="edit-task-assign-checkbox" value="ivy" style="margin-right: 8px;"> Ivy</label>
+            <label style="font-size: 14px; cursor: pointer; display: flex; align-items: center;"><input type="checkbox" class="edit-task-assign-checkbox" value="angus" style="margin-right: 8px;"> Angus</label>
+          </div>
+        </fieldset>
       </div>
 
       <!-- Recurrence -->
@@ -2501,9 +2505,15 @@
         document.getElementById('edit-task-end-date').value = '';
       }
 
-      // Set assigned to
-      const assignedTo = Array.isArray(task.assignedTo) ? task.assignedTo[0] : task.assignedTo;
-      document.getElementById('edit-task-assignee').value = assignedTo || 'ian';
+      // Set assigned to checkboxes
+      document.querySelectorAll('.edit-task-assign-checkbox').forEach(cb => cb.checked = false);
+      const assignedTo = Array.isArray(task.assignedTo) ? task.assignedTo : [task.assignedTo];
+      assignedTo.forEach(person => {
+        const checkbox = document.querySelector(`.edit-task-assign-checkbox[value="${person}"]`);
+        if (checkbox) {
+          checkbox.checked = true;
+        }
+      });
 
       document.getElementById('edit-modal').classList.add('active');
     }
@@ -2523,7 +2533,23 @@
       task.category = document.getElementById('edit-task-category').value;
       task.size = document.getElementById('edit-task-size').value;
       task.recurPattern = document.getElementById('edit-task-recur').value;
-      task.assignedTo = [document.getElementById('edit-task-assignee').value];
+
+      // Get multiple assignments from checkboxes
+      const checkedBoxes = Array.from(document.querySelectorAll('.edit-task-assign-checkbox:checked'));
+      let assignedTo = checkedBoxes.map(cb => cb.value);
+
+      // Handle "All" option
+      if (assignedTo.includes('all')) {
+        assignedTo = Object.keys(users);
+      }
+
+      // Ensure at least one person is assigned
+      if (assignedTo.length === 0) {
+        showTaskError('Please assign to at least one person');
+        return;
+      }
+
+      task.assignedTo = assignedTo;
 
       // Format due date with time if provided
       const dueDate = document.getElementById('edit-task-due-date').value;
