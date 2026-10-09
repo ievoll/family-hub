@@ -1736,6 +1736,22 @@
         </div>
       </div>
 
+      <!-- End Date (optional) -->
+      <div style="margin-bottom: 24px;">
+        <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">End Date <span style="font-weight: 400;">(optional)</span></label>
+        <input type="date" id="edit-task-end-date" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
+      </div>
+
+      <!-- Assigned To -->
+      <div style="margin-bottom: 24px;">
+        <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Assigned To</label>
+        <select id="edit-task-assignee" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
+          <option value="ian">Ian</option>
+          <option value="cindy">Cindy</option>
+          <option value="ivy">Ivy</option>
+        </select>
+      </div>
+
       <!-- Recurrence -->
       <div style="margin-bottom: 24px;">
         <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Recurrence</label>
@@ -1903,7 +1919,15 @@
       allTasks: { mode: 'all-selected' }
     };
 
-    const TODAY = new Date().toISOString().split('T')[0];
+    // Get today's date in local timezone (not UTC)
+    const getTodayLocal = () => {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    };
+    const TODAY = getTodayLocal();
 
     // Helper function to parse date strings that may have time component (YYYY-MM-DD HH:MM)
     function parseTaskDate(dateStr) {
@@ -2469,6 +2493,18 @@
         document.getElementById('edit-task-duration-minute').value = '';
       }
 
+      // Set end date if present
+      if (task.endDate) {
+        const endDateOnly = task.endDate.split(' ')[0];
+        document.getElementById('edit-task-end-date').value = endDateOnly;
+      } else {
+        document.getElementById('edit-task-end-date').value = '';
+      }
+
+      // Set assigned to
+      const assignedTo = Array.isArray(task.assignedTo) ? task.assignedTo[0] : task.assignedTo;
+      document.getElementById('edit-task-assignee').value = assignedTo || 'ian';
+
       document.getElementById('edit-modal').classList.add('active');
     }
 
@@ -2487,6 +2523,7 @@
       task.category = document.getElementById('edit-task-category').value;
       task.size = document.getElementById('edit-task-size').value;
       task.recurPattern = document.getElementById('edit-task-recur').value;
+      task.assignedTo = [document.getElementById('edit-task-assignee').value];
 
       // Format due date with time if provided
       const dueDate = document.getElementById('edit-task-due-date').value;
@@ -2494,6 +2531,14 @@
       const dueMinute = document.getElementById('edit-task-due-minute').value;
       const formattedDueDate = dueDate + (dueHour || dueMinute ? ` ${String(dueHour || '00').padStart(2, '0')}:${String(dueMinute || '00').padStart(2, '0')}` : '');
       task.dueDate = formattedDueDate;
+
+      // Format end date with time if provided
+      const endDate = document.getElementById('edit-task-end-date').value;
+      if (endDate) {
+        task.endDate = endDate;
+      } else {
+        task.endDate = null;
+      }
 
       // Format and save duration
       const durationHour = document.getElementById('edit-task-duration-hour').value;
@@ -3231,7 +3276,8 @@
       const html = myTasks.length === 0
         ? '<div class="empty-state"><p>No tasks assigned to you yet!</p></div>'
         : myTasks.map(task => {
-          const isOverdue = !task.completed && parseTaskDate(task.dueDate) < new Date(TODAY);
+          const taskDueDate = task.dueDate ? task.dueDate.split(' ')[0] : '';
+          const isOverdue = !task.completed && taskDueDate < TODAY;
           const isDueSoon = !task.completed && (parseTaskDate(task.dueDate) - new Date(TODAY)) / (1000*60*60*24) <= 2;
           
           return `
@@ -3422,7 +3468,8 @@
         const tasksList = userTasks.length === 0
           ? '<div class="empty-state"><p>No tasks</p></div>'
           : userTasks.map(task => {
-            const isOverdue = !task.completed && parseTaskDate(task.dueDate) < new Date(TODAY);
+            const taskDueDate = task.dueDate ? task.dueDate.split(' ')[0] : '';
+            const isOverdue = !task.completed && taskDueDate < TODAY;
 
             return `
               <div class="item ${task.category} ${task.completed ? 'completed' : ''}">
