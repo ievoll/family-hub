@@ -1900,6 +1900,7 @@
     let shopCart = {}; // { itemId: quantity }
     let shopSpending = {}; // { userName: totalSpentWB }
     let earnedWBPerUser = {}; // { userName: totalEarnedWB } - tracks earned WB permanently
+    let completedTasksPerUser = {}; // { userName: totalCompletedTasks } - tracks completed task counts permanently
     let purchaseHistory = []; // Array of { userId, itemId, quantity, cost, date }
     let claimedItems = []; // Array of { userId, itemId, quantity, cost, date, claimedAt, id }
     let deletedTaskStats = []; // Array of { completedAt, size, assignedTo, wb } - permanent record of deleted task stats
@@ -1909,6 +1910,7 @@
     Object.keys(users).forEach(userId => {
       shopSpending[userId] = 0;
       earnedWBPerUser[userId] = 0;
+      completedTasksPerUser[userId] = 0;
     });
 
     // Filter state
@@ -1985,6 +1987,7 @@
           tasks = data.tasks || [];
           shopSpending = data.shopSpending || {};
           earnedWBPerUser = data.earnedWBPerUser || {};
+          completedTasksPerUser = data.completedTasksPerUser || {};
           purchaseHistory = data.purchaseHistory || [];
           claimedItems = data.claimedItems || [];
           deletedTaskStats = data.deletedTaskStats || [];
@@ -1992,13 +1995,16 @@
           // Load notes for all users
           notes = data.notes || {};
 
-          // Ensure all users have spending and earning entries
+          // Ensure all users have spending, earning, and completed task entries
           Object.keys(users).forEach(userId => {
             if (!(userId in shopSpending)) {
               shopSpending[userId] = 0;
             }
             if (!(userId in earnedWBPerUser)) {
               earnedWBPerUser[userId] = 0;
+            }
+            if (!(userId in completedTasksPerUser)) {
+              completedTasksPerUser[userId] = 0;
             }
           });
 
@@ -2051,6 +2057,7 @@
         tasks: cleanTasks,
         shopSpending: shopSpending,
         earnedWBPerUser: earnedWBPerUser,
+        completedTasksPerUser: completedTasksPerUser,
         purchaseHistory: purchaseHistory,
         claimedItems: claimedItems,
         deletedTaskStats: deletedTaskStats,
@@ -2080,12 +2087,14 @@
       shopCart = {};
       shopSpending = {};
       earnedWBPerUser = {};
+      completedTasksPerUser = {};
       purchaseHistory = [];
       claimedItems = [];
       notes = {};
       Object.keys(users).forEach(userId => {
         shopSpending[userId] = 0;
         earnedWBPerUser[userId] = 0;
+        completedTasksPerUser[userId] = 0;
       });
       database.ref('familyHub').remove().then(() => {
         closeClearDataModal();
@@ -2389,6 +2398,7 @@
         const wbReward = sizes[newTask.size].wb;
         assignedTo.forEach(assignee => {
           earnedWBPerUser[assignee] = (earnedWBPerUser[assignee] || 0) + wbReward;
+          completedTasksPerUser[assignee] = (completedTasksPerUser[assignee] || 0) + 1;
         });
       }
 
@@ -2595,6 +2605,8 @@
           const wbReward = sizes[task.size].wb;
           assignees.forEach(assignee => {
             earnedWBPerUser[assignee] = (earnedWBPerUser[assignee] || 0) + wbReward;
+            // Also increment the permanent completed task count
+            completedTasksPerUser[assignee] = (completedTasksPerUser[assignee] || 0) + 1;
           });
           task.wbAwarded = true;
         }
@@ -2606,6 +2618,8 @@
           const wbReward = sizes[task.size].wb;
           assignees.forEach(assignee => {
             earnedWBPerUser[assignee] = Math.max(0, (earnedWBPerUser[assignee] || 0) - wbReward);
+            // Also decrement the permanent completed task count
+            completedTasksPerUser[assignee] = Math.max(0, (completedTasksPerUser[assignee] || 0) - 1);
           });
           task.wbAwarded = false;
         }
@@ -3647,10 +3661,11 @@
         }
       });
 
-      // For "all time", ensure WB totals match earnedWBPerUser (use it as authoritative)
+      // For "all time", ensure WB and task completion totals match permanent records (use them as authoritative)
       if (isAllTime) {
         Object.keys(users).forEach(userId => {
           scores[userId].wb = earnedWBPerUser[userId] || 0;
+          scores[userId].tasksCompleted = completedTasksPerUser[userId] || 0;
         });
       }
 
