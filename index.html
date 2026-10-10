@@ -1559,17 +1559,6 @@
             <p>Total wuzzabucks from completed tasks</p>
           </div>
 
-          <div class="filter-bar">
-            <div class="filter-group">
-              <div class="filter-label">Date Range</div>
-              <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="daterange" data-value="all-time" onclick="updateLeaderboardFilter('all-time', this)">All Time</button>
-                <button class="filter-btn" data-filter="daterange" data-value="past-month" onclick="updateLeaderboardFilter('past-month', this)">Past Month</button>
-                <button class="filter-btn" data-filter="daterange" data-value="past-year" onclick="updateLeaderboardFilter('past-year', this)">Past Year</button>
-              </div>
-            </div>
-          </div>
-
           <div class="leaderboard" id="leaderboard-content"></div>
 
           <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border); display: none;" id="clear-data-section">
@@ -1930,7 +1919,6 @@
     let calendarFilters = { person: 'all', status: 'all', type: 'all', categories: new Set(Object.keys(categories)) };
     let myTasksFilters = { status: 'all', type: 'all', categories: new Set(Object.keys(categories)), showArchived: false };
     let allTasksFilters = { person: 'all', status: 'all', type: 'all', categories: new Set(Object.keys(categories)), showArchived: false };
-    let leaderboardFilters = { dateRange: 'all-time' };
     let shopViewUser = 'ian'; // Track which user's shop is being viewed (for admin view)
     let calendarShowAll = false;
 
@@ -3250,12 +3238,6 @@
       }).join('');
     }
 
-    function updateLeaderboardFilter(dateRange, btn) {
-      leaderboardFilters.dateRange = dateRange;
-      btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      renderLeaderboard();
-    }
 
 
     function handleCategoryClick(filterType, category, btn, event) {
@@ -3834,17 +3816,9 @@
         };
       });
 
-      // Calculate cutoff date based on filter
-      const now = new Date();
-      let cutoffDate = null;
-      const isAllTime = leaderboardFilters.dateRange === 'all-time';
-      if (leaderboardFilters.dateRange === 'past-week') {
-        cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-      } else if (leaderboardFilters.dateRange === 'past-month') {
-        cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-      } else if (leaderboardFilters.dateRange === 'past-year') {
-        cutoffDate = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
-      }
+      // Always show all-time results
+      const isAllTime = true;
+      const cutoffDate = null;
 
       // Track counts by animal size and person
       const animalCounts = {};
