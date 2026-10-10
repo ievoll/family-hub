@@ -3178,6 +3178,10 @@
     function renderCalendar() {
       renderCalendarCategoryFilters();
 
+      console.log('renderCalendar called. Total tasks:', tasks.length);
+      console.log('calendarFilters.categories:', Array.from(calendarFilters.categories));
+      console.log('canSeeTask check for first task:', tasks.length > 0 ? canSeeTask(tasks[0]) : 'no tasks');
+
       const year = currentDate.getFullYear();
       const month = currentDate.getMonth();
 
