@@ -3286,9 +3286,9 @@
                 bgStyle = 'var(--person-multiple)';
                 borderColor = 'var(--person-multiple)';
               } else {
-                const userColor = users[firstAssignee]?.color || '#9ca3af';
-                bgStyle = userColor;
-                borderColor = userColor;
+                const personColorMap = { 'ian': 'var(--person-ian)', 'cindy': 'var(--person-cindy)', 'ivy': 'var(--person-ivy)', 'angus': 'var(--person-angus)' };
+                bgStyle = personColorMap[firstAssignee] || 'var(--person-multiple)';
+                borderColor = bgStyle;
               }
 
               return `<div class="calendar-task" style="background: ${bgStyle}; border-left: 4px solid ${borderColor}; cursor: pointer;" onclick="navigateToPersonItems('${firstAssignee}')"><span class="calendar-task-title">${escapeHtml(t.title)}</span>${timeDisplay}<div class="calendar-task-cat">${categories[t.category]}</div></div>`;
