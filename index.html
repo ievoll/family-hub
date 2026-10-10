@@ -48,10 +48,11 @@
       --size-elephant: #a78bfa;
 
       /* Person colors */
-      --person-ian: #3b82f6;
-      --person-cindy: #f43f5e;
-      --person-ivy: #a855f7;
-      --person-angus: #10b981;
+      --person-ian: #2563eb;
+      --person-cindy: #e11d48;
+      --person-ivy: #9333ea;
+      --person-angus: #059669;
+      --person-multiple: #6b7280;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -3278,17 +3279,15 @@
               const assignees = Array.isArray(t.assignedTo) ? t.assignedTo : [t.assignedTo];
               const firstAssignee = assignees[0] || 'ian';
 
-              // Create gradient for multiple assignees
+              // Use solid colors for single owner, neutral for multiple
               let bgStyle;
               let borderColor;
               if (assignees.length > 1) {
-                const colors = assignees.map(a => users[a]?.color || '#9ca3af').slice(0, 4);
-                const gradientStops = colors.map((c, i) => `${c}20 ${Math.round((i / (colors.length - 1)) * 100)}%`).join(', ');
-                bgStyle = `linear-gradient(to right, ${gradientStops})`;
-                borderColor = colors[0]; // First assignee's color for border
+                bgStyle = 'var(--person-multiple)';
+                borderColor = 'var(--person-multiple)';
               } else {
                 const userColor = users[firstAssignee]?.color || '#9ca3af';
-                bgStyle = userColor + '20';
+                bgStyle = userColor;
                 borderColor = userColor;
               }
 
@@ -3384,6 +3383,16 @@
         return `${year}-${month}-${day}`;
       };
 
+      // Helper to get assignee color
+      const getAssigneeColor = (assignedTo) => {
+        const assignees = Array.isArray(assignedTo) ? assignedTo : [assignedTo];
+        if (assignees.length > 1) {
+          return 'var(--person-multiple)';
+        }
+        const personColorMap = { 'ian': 'var(--person-ian)', 'cindy': 'var(--person-cindy)', 'ivy': 'var(--person-ivy)', 'angus': 'var(--person-angus)' };
+        return personColorMap[assignees[0]] || 'var(--person-multiple)';
+      };
+
       // Hide past events (both single and recurring)
       // Events are "complete" when today > dueDate, so show only future events
       myTasks = myTasks.filter(t => {
@@ -3443,16 +3452,17 @@
       });
 
       myTasks.sort((a, b) => parseTaskDate(a.dueDate) - parseTaskDate(b.dueDate));
-      
+
       const html = myTasks.length === 0
         ? '<div class="empty-state"><p>No tasks assigned to you yet!</p></div>'
         : myTasks.map(task => {
           const taskDueDate = task.dueDate ? task.dueDate.split(' ')[0] : '';
           const isOverdue = !task.completed && taskDueDate < TODAY;
           const isDueSoon = !task.completed && (parseTaskDate(task.dueDate) - new Date(TODAY)) / (1000*60*60*24) <= 2;
-          
+          const assigneeColor = getAssigneeColor(task.assignedTo);
+
           return `
-            <div class="item ${task.category} ${task.completed ? 'completed' : ''}">
+            <div class="item ${task.category} ${task.completed ? 'completed' : ''}" style="border-left-color: ${assigneeColor};">
               ${task.type !== 'event' ? `<input type="checkbox" class="item-checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${task.id})">` : '<div style="width: 18px; flex-shrink: 0;"></div>'}
               <div class="item-content">
                 <div class="item-title">${escapeHtml(task.title)}</div>
@@ -3492,6 +3502,16 @@
       }
 
       let html = '';
+
+      // Helper to get assignee color
+      const getAssigneeColor = (assignedTo) => {
+        const assignees = Array.isArray(assignedTo) ? assignedTo : [assignedTo];
+        if (assignees.length > 1) {
+          return 'var(--person-multiple)';
+        }
+        const personColorMap = { 'ian': 'var(--person-ian)', 'cindy': 'var(--person-cindy)', 'ivy': 'var(--person-ivy)', 'angus': 'var(--person-angus)' };
+        return personColorMap[assignees[0]] || 'var(--person-multiple)';
+      };
 
       Object.entries(users).forEach(([userId, userData]) => {
         let userTasks = tasks.filter(t => {
@@ -3641,9 +3661,10 @@
           : userTasks.map(task => {
             const taskDueDate = task.dueDate ? task.dueDate.split(' ')[0] : '';
             const isOverdue = !task.completed && taskDueDate < TODAY;
+            const assigneeColor = getAssigneeColor(task.assignedTo);
 
             return `
-              <div class="item ${task.category} ${task.completed ? 'completed' : ''}">
+              <div class="item ${task.category} ${task.completed ? 'completed' : ''}" style="border-left-color: ${assigneeColor};">
                 ${task.type !== 'event' ? `<input type="checkbox" class="item-checkbox" ${task.completed ? 'checked' : ''} onchange="toggleTask(${task.id})">` : '<div style="width: 18px; flex-shrink: 0;"></div>'}
                 <div class="item-content">
                   <div class="item-title">${escapeHtml(task.title)}</div>
@@ -3786,9 +3807,9 @@
           </thead>
           <tbody>
             ${ranked.map(score => {
-              const personColors = { ian: 'rgba(59, 130, 246, 0.1)', cindy: 'rgba(244, 63, 94, 0.1)', ivy: 'rgba(168, 85, 247, 0.1)', angus: 'rgba(16, 185, 129, 0.1)' };
+              const personColors = { ian: 'var(--person-ian)', cindy: 'var(--person-cindy)', ivy: 'var(--person-ivy)', angus: 'var(--person-angus)' };
               return `
-              <tr style="background-color: ${personColors[score.userId]};">
+              <tr style="background-color: ${personColors[score.userId]}; color: white;">
                 <td><span class="rank-badge rank-${score.rank}">${score.rank}</span></td>
                 <td><strong>${score.name}</strong></td>
                 <td class="wuzzabucks-total">${score.wb} WB</td>
