@@ -1836,7 +1836,6 @@
       <div class="modal-actions" style="flex-direction: column; gap: 8px;">
         <button style="background: var(--accent); color: white;" onclick="applyEditToThisOnly()">This Event Only</button>
         <button style="background: var(--accent); color: white;" onclick="applyEditToThisAndFollowing()">This and All Following</button>
-        <button style="background: var(--accent); color: white;" onclick="applyEditToAllEvents()">All Events in Series</button>
         <button class="btn-secondary" onclick="closeEditRecurringModal()">Cancel</button>
       </div>
     </div>
@@ -2120,10 +2119,22 @@
         const claimedItem = {
           ...purchasedItem,
           claimedAt: new Date().toISOString(),
-          id: Date.now()
+          claimedItemId: Date.now() + '-' + Math.random().toString(36).substr(2, 9)  // Separate ID for claimed item
         };
         claimedItems.push(claimedItem);
-        purchaseHistory = purchaseHistory.filter(p => !(p.userId === currentUser && p.itemId === purchasedItem.itemId && p.date === purchasedItem.date));
+        // Use purchase ID for deletion - prevents collateral deletion if properties match
+        // Fall back to property matching for old purchases that might not have an id field
+        purchaseHistory = purchaseHistory.filter(p => {
+          if (purchasedItem.id) {
+            // New purchases with unique id field
+            return p.id !== purchasedItem.id;
+          } else {
+            // Legacy fallback for old purchases (property matching)
+            return !(p.userId === currentUser &&
+                    p.itemId === purchasedItem.itemId &&
+                    p.date === purchasedItem.date);
+          }
+        });
         saveData();
         renderShop();
       }
@@ -2139,6 +2150,10 @@
           cost: claimedItem.cost,
           date: claimedItem.date
         };
+        // Preserve the original purchase id if it exists, for proper identification
+        if (claimedItem.id) {
+          restoredItem.id = claimedItem.id;
+        }
         purchaseHistory.push(restoredItem);
         claimedItems.splice(claimedIndex, 1);
         saveData();
@@ -2270,14 +2285,24 @@
       }
 
       // For recurring tasks, only show dates if this is the earliest uncompleted task in the series
-      // Find all tasks with the same title, category, and recurrence pattern (excluding this one)
-      const sameSeries = tasks.filter(t =>
-        t.id !== task.id &&
-        t.title === task.title &&
-        t.category === task.category &&
-        t.recurPattern === task.recurPattern &&
-        JSON.stringify(t.assignedTo) === JSON.stringify(task.assignedTo)
-      );
+      // Use seriesId if available, otherwise fall back to property-based matching
+      let sameSeries;
+      if (task.seriesId) {
+        // New tasks with seriesId
+        sameSeries = tasks.filter(t =>
+          t.id !== task.id &&
+          t.seriesId === task.seriesId
+        );
+      } else {
+        // Legacy fallback: match by title, category, recurPattern, and assignedTo
+        sameSeries = tasks.filter(t =>
+          t.id !== task.id &&
+          t.title === task.title &&
+          t.category === task.category &&
+          t.recurPattern === task.recurPattern &&
+          JSON.stringify(t.assignedTo) === JSON.stringify(task.assignedTo)
+        );
+      }
 
       // Find if there's an earlier uncompleted task in this series
       const earlierUncompleted = sameSeries.find(t =>
@@ -2399,6 +2424,11 @@
         createdAt: new Date().toISOString()
       };
 
+      // Generate seriesId for recurring tasks to prevent collateral deletion
+      if (recur !== 'once') {
+        newTask.seriesId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+      }
+
       // If task is created as completed, award WB immediately
       if (newTask.completed && newTask.type !== 'event' && newTask.size && sizes[newTask.size]) {
         newTask.completedAt = new Date().toISOString();
@@ -2448,7 +2478,7 @@
 
       if (!title || !assignedTo || !category || !size || !dueDate) return;
 
-      tasks.push({
+      const newAdminTask = {
         id: Date.now(),
         title,
         category,
@@ -2460,7 +2490,14 @@
         recurPattern: recur,
         completed: completed,
         createdAt: new Date().toISOString()
-      });
+      };
+
+      // Generate seriesId for recurring tasks to prevent collateral deletion
+      if (recur !== 'once') {
+        newAdminTask.seriesId = Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+      }
+
+      tasks.push(newAdminTask);
 
       document.getElementById('admin-task-title').value = '';
       document.getElementById('admin-task-assign').value = '';
@@ -2650,9 +2687,22 @@
 
       const currentOccurrence = task.occurrenceNumber || 1;
 
-      // Apply changes to this task and all following occurrences with the same recurPattern
+      // Apply changes to this task and all following occurrences
       tasks.forEach(t => {
-        if (t.recurPattern === task.recurPattern && (t.occurrenceNumber || 1) >= currentOccurrence) {
+        let isInSameSeries = false;
+
+        if (task.seriesId && t.seriesId === task.seriesId) {
+          // New seriesId-based matching
+          isInSameSeries = (t.occurrenceNumber || 1) >= currentOccurrence;
+        } else if (!task.seriesId && !t.seriesId) {
+          // Legacy fallback for tasks without seriesId
+          isInSameSeries = (t.recurPattern === task.recurPattern &&
+                           t.assignedBy === task.assignedBy &&
+                           t.title === task.title &&
+                           (t.occurrenceNumber || 1) >= currentOccurrence);
+        }
+
+        if (isInSameSeries) {
           t.title = pendingEditChanges.title;
           t.category = pendingEditChanges.category;
           t.size = pendingEditChanges.size;
@@ -2675,9 +2725,21 @@
       const task = tasks.find(t => t.id === editingTaskId);
       if (!task) return;
 
-      // Apply changes to all tasks with the same recurPattern
+      // Apply changes to all tasks in the same series
       tasks.forEach(t => {
-        if (t.recurPattern === task.recurPattern) {
+        let isInSameSeries = false;
+
+        if (task.seriesId && t.seriesId === task.seriesId) {
+          // New seriesId-based matching
+          isInSameSeries = true;
+        } else if (!task.seriesId && !t.seriesId) {
+          // Legacy fallback for tasks without seriesId
+          isInSameSeries = (t.recurPattern === task.recurPattern &&
+                           t.assignedBy === task.assignedBy &&
+                           t.title === task.title);
+        }
+
+        if (isInSameSeries) {
           t.title = pendingEditChanges.title;
           t.category = pendingEditChanges.category;
           t.size = pendingEditChanges.size;
@@ -2735,16 +2797,27 @@
         if (currentOccurrence < maxOccurrences) {
           // Check if the next task already exists
           const nextOccurrence = currentOccurrence + 1;
-          const nextTaskExists = tasks.some(t =>
-            t.title === task.title &&
-            t.assignedBy === task.assignedBy &&
-            t.recurPattern === task.recurPattern &&
-            t.occurrenceNumber === nextOccurrence
-          );
+          let nextTaskExists;
+          if (task.seriesId) {
+            // Use seriesId for new tasks
+            nextTaskExists = tasks.some(t =>
+              t.seriesId === task.seriesId &&
+              t.occurrenceNumber === nextOccurrence
+            );
+          } else {
+            // Legacy fallback
+            nextTaskExists = tasks.some(t =>
+              t.title === task.title &&
+              t.assignedBy === task.assignedBy &&
+              t.recurPattern === task.recurPattern &&
+              t.occurrenceNumber === nextOccurrence &&
+              !t.seriesId
+            );
+          }
 
           if (!nextTaskExists) {
             const nextDate = getNextDate(task.dueDate.split(' ')[0], task.recurPattern);
-            tasks.push({
+            const nextTaskObj = {
               id: Date.now() + Math.random(),
               title: task.title,
               category: task.category,
@@ -2760,7 +2833,12 @@
               completed: false,
               type: task.type,
               createdAt: new Date().toISOString()
-            });
+            };
+            // Preserve seriesId to maintain series identity
+            if (task.seriesId) {
+              nextTaskObj.seriesId = task.seriesId;
+            }
+            tasks.push(nextTaskObj);
           }
         }
       } else if (!task.completed && !wasCompleted && task.recurPattern && task.recurPattern !== 'once') {
@@ -2770,11 +2848,23 @@
 
         // Find and remove the next task if it looks auto-created and untouched
         tasks = tasks.filter(t => {
-          if (t.title === task.title &&
-              t.assignedBy === task.assignedBy &&
-              t.recurPattern === task.recurPattern &&
-              t.occurrenceNumber === nextOccurrence &&
-              !t.completed) {
+          let isNextTask = false;
+          if (task.seriesId) {
+            // Use seriesId for new tasks
+            isNextTask = (t.seriesId === task.seriesId &&
+                         t.occurrenceNumber === nextOccurrence &&
+                         !t.completed);
+          } else {
+            // Legacy fallback
+            isNextTask = (t.title === task.title &&
+                         t.assignedBy === task.assignedBy &&
+                         t.recurPattern === task.recurPattern &&
+                         t.occurrenceNumber === nextOccurrence &&
+                         !t.completed &&
+                         !t.seriesId);
+          }
+
+          if (isNextTask) {
             // Check if this task hasn't been modified (was just auto-created)
             // Only remove if it was created after the current task's toggle
             return false; // Remove it
@@ -2804,7 +2894,7 @@
           // Create next occurrence if we haven't exceeded maxOccurrences
           if (currentOccurrence < maxOccurrences) {
             const nextDate = getNextDate(task.dueDate.split(' ')[0], task.recurPattern);
-            tasks.push({
+            const nextTaskObj = {
               id: Date.now() + Math.random(),
               title: task.title,
               category: task.category,
@@ -2820,7 +2910,12 @@
               completed: false,
               type: task.type,
               createdAt: new Date().toISOString()
-            });
+            };
+            // Preserve seriesId to maintain series identity
+            if (task.seriesId) {
+              nextTaskObj.seriesId = task.seriesId;
+            }
+            tasks.push(nextTaskObj);
           }
         }
 
@@ -2920,14 +3015,21 @@
         if (!task) return;
 
         if (pendingDeleteType === 'series') {
-          // Delete entire series - find all tasks with same title/assignedBy/recurPattern/maxOccurrences
-          const maxOccurrences = task.maxOccurrences || Infinity;
-          tasks = tasks.filter(t =>
-            !(t.title === task.title &&
-              t.assignedBy === task.assignedBy &&
-              t.recurPattern === task.recurPattern &&
-              (t.maxOccurrences || Infinity) === maxOccurrences)
-          );
+          // Delete entire series - use seriesId to identify the exact series
+          // Fall back to old matching logic if seriesId doesn't exist (for old tasks)
+          if (task.seriesId) {
+            tasks = tasks.filter(t => t.seriesId !== task.seriesId);
+          } else {
+            // Legacy fallback for tasks created before seriesId was added
+            const maxOccurrences = task.maxOccurrences || Infinity;
+            tasks = tasks.filter(t =>
+              !(t.title === task.title &&
+                t.assignedBy === task.assignedBy &&
+                t.recurPattern === task.recurPattern &&
+                (t.maxOccurrences || Infinity) === maxOccurrences &&
+                !t.seriesId)  // Only match if seriesId is also missing (same old task)
+            );
+          }
         } else if (pendingDeleteType === 'occurrence') {
           // Delete just this occurrence (same as regular deleteTask)
           deleteTask(pendingDeleteTaskId);
@@ -3331,8 +3433,14 @@
           return true; // Keep all single tasks and all events (will filter by date later)
         }
 
-        // Create a series key: title + assignedBy + recurPattern + maxOccurrences
-        const seriesKey = `${t.title}|${t.assignedBy}|${t.recurPattern}|${t.maxOccurrences || 'none'}`;
+        // Use seriesId if available (new tasks), otherwise fall back to legacy property-based key
+        let seriesKey;
+        if (t.seriesId) {
+          seriesKey = t.seriesId;
+        } else {
+          // Legacy fallback: title + assignedBy + recurPattern + maxOccurrences
+          seriesKey = `legacy:${t.title}|${t.assignedBy}|${t.recurPattern}|${t.maxOccurrences || 'none'}`;
+        }
 
         if (!(seriesKey in seriesMap)) {
           seriesMap[seriesKey] = [];
@@ -3890,6 +3998,7 @@
         const qty = shopCart[itemId];
         const cost = shopItems[itemId].cost * qty;
         purchaseHistory.push({
+          id: Date.now() + '-' + Math.random().toString(36).substr(2, 9),  // Unique identifier to prevent collateral deletion
           userId: currentUser,
           itemId: itemId,
           quantity: qty,
