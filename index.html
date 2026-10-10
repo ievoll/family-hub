@@ -3404,7 +3404,7 @@
               const firstAssignee = assignees[0] || 'ian';
               const taskColor = getTaskColor(t.assignedTo);
 
-              return `<div class="calendar-task" style="cursor: pointer; border-left: 4px solid ${taskColor};" onclick="navigateToPersonItems('${firstAssignee}')"><span class="calendar-task-title">${escapeHtml(t.title)}</span>${timeDisplay}<div class="calendar-task-cat">${categories[t.category]}</div></div>`;
+              return `<div class="calendar-task" style="cursor: pointer; background-color: ${taskColor}; color: white;" onclick="navigateToPersonItems('${firstAssignee}')"><span class="calendar-task-title">${escapeHtml(t.title)}</span>${timeDisplay}<div class="calendar-task-cat">${categories[t.category]}</div></div>`;
             }).join('')}
           </div>
         </div>`;
