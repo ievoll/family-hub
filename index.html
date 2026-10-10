@@ -1680,7 +1680,7 @@
             <option value="other">📌 Other</option>
           </select>
         </div>
-        <div>
+        <div class="edit-task-only-field">
           <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Size</label>
           <select id="edit-task-size" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
             <option value="ant">🐜 Ant (0 WB)</option>
@@ -1752,7 +1752,7 @@
       <!-- Recurrence -->
       <div style="margin-bottom: 24px;">
         <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Recurrence</label>
-        <select id="edit-task-recur" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
+        <select id="edit-task-recur" onchange="updateEditRecurringFields()" style="width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
           <option value="once">Once</option>
           <option value="daily">Daily</option>
           <option value="weekly">Weekly</option>
@@ -1760,6 +1760,14 @@
           <option value="monthly">Monthly</option>
         </select>
       </div>
+
+      <!-- Number of Occurrences -->
+      <div style="margin-bottom: 24px;">
+        <label style="font-size: 13px; color: var(--text-secondary); display: block; margin-bottom: 8px; font-weight: 500;">Number of Occurrences</label>
+        <input type="number" id="edit-task-occurrences" placeholder="Number of occurrences" min="1" style="display: none; width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg-primary); color: var(--text-primary); font-size: 14px;">
+      </div>
+
+      <div id="edit-task-error" style="display: none; background-color: #fee2e2; color: #dc2626; padding: 12px; border-radius: 6px; margin-bottom: 12px; font-size: 13px; border: 1px solid #fecaca;"></div>
 
       <div class="modal-actions">
         <button class="btn-secondary" onclick="closeEditModal()">Cancel</button>
@@ -2359,6 +2367,33 @@
       }
     }
 
+    function updateEditRecurringFields() {
+      const recur = document.getElementById('edit-task-recur').value;
+      const occurrencesField = document.getElementById('edit-task-occurrences');
+
+      // Show occurrences field only if recurring is selected
+      if (recur !== 'once') {
+        occurrencesField.style.display = 'block';
+      } else {
+        occurrencesField.style.display = 'none';
+        occurrencesField.value = ''; // Clear when switching to "once"
+      }
+    }
+
+    function showEditError(message) {
+      const errorDiv = document.getElementById('edit-task-error');
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      setTimeout(() => {
+        errorDiv.style.display = 'none';
+      }, 4000);
+    }
+
+    function hideEditError() {
+      const errorDiv = document.getElementById('edit-task-error');
+      errorDiv.style.display = 'none';
+    }
+
     function addTask() {
       try {
       const title = document.getElementById('task-title').value.trim();
@@ -2532,8 +2567,26 @@
       editingTaskId = id;
       document.getElementById('edit-task-title').value = task.title;
       document.getElementById('edit-task-category').value = task.category;
-      document.getElementById('edit-task-size').value = task.size;
+      document.getElementById('edit-task-size').value = task.size || '';
       document.getElementById('edit-task-recur').value = task.recurPattern || 'once';
+
+      // Show/hide task-only fields based on type
+      const isTask = task.type === 'task' || !task.type; // Default to task if type not set
+      const taskOnlyFields = document.querySelectorAll('.edit-task-only-field');
+      taskOnlyFields.forEach(el => {
+        el.style.display = isTask ? 'block' : 'none';
+      });
+
+      // Set occurrences if this is a recurring task
+      const occurrencesField = document.getElementById('edit-task-occurrences');
+      if (task.maxOccurrences && task.maxOccurrences !== Infinity) {
+        occurrencesField.value = task.maxOccurrences;
+      } else {
+        occurrencesField.value = '';
+      }
+
+      // Show/hide occurrences field based on recurrence
+      updateEditRecurringFields();
 
       // Parse dueDate which may contain time (e.g., "2024-09-24 14:30" or "2024-09-24")
       const dueDateStr = task.dueDate || '';
@@ -2598,8 +2651,18 @@
       // Collect all changes
       const newTitle = document.getElementById('edit-task-title').value.trim();
       const newCategory = document.getElementById('edit-task-category').value;
-      const newSize = document.getElementById('edit-task-size').value;
+      const isTask = task.type === 'task' || !task.type;
+      const newSize = isTask ? document.getElementById('edit-task-size').value : undefined;
       const newRecurPattern = document.getElementById('edit-task-recur').value;
+
+      // Get occurrences for recurring tasks
+      const occurrencesField = document.getElementById('edit-task-occurrences');
+      const newOccurrences = (newRecurPattern !== 'once' && occurrencesField.value) ? parseInt(occurrencesField.value) : null;
+
+      if (newRecurPattern !== 'once' && (!newOccurrences || newOccurrences < 1)) {
+        showEditError('Please enter a number of occurrences (at least 1)');
+        return;
+      }
 
       // Get multiple assignments from checkboxes
       const checkedBoxes = Array.from(document.querySelectorAll('.edit-task-assign-checkbox:checked'));
@@ -2612,7 +2675,7 @@
 
       // Ensure at least one person is assigned
       if (newAssignedTo.length === 0) {
-        showTaskError('Please assign to at least one person');
+        showEditError('Please assign to at least one person');
         return;
       }
 
@@ -2639,24 +2702,26 @@
         pendingEditChanges = {
           title: newTitle,
           category: newCategory,
-          size: newSize,
+          ...(isTask && { size: newSize }),
           recurPattern: newRecurPattern,
           assignedTo: newAssignedTo,
           dueDate: newDueDate,
           endDate: newEndDate,
-          duration: newDuration
+          duration: newDuration,
+          ...(newOccurrences && { maxOccurrences: newOccurrences })
         };
         document.getElementById('edit-recurring-task-modal').classList.add('active');
       } else {
         // Apply changes directly for non-recurring tasks
         task.title = newTitle;
         task.category = newCategory;
-        task.size = newSize;
+        if (isTask) task.size = newSize;
         task.recurPattern = newRecurPattern;
         task.assignedTo = newAssignedTo;
         task.dueDate = newDueDate;
         task.endDate = newEndDate;
         task.duration = newDuration;
+        if (newOccurrences) task.maxOccurrences = newOccurrences;
 
         saveData();
         closeEditModal();
@@ -2677,12 +2742,13 @@
       // Apply changes only to this task
       task.title = pendingEditChanges.title;
       task.category = pendingEditChanges.category;
-      task.size = pendingEditChanges.size;
+      if ('size' in pendingEditChanges) task.size = pendingEditChanges.size;
       task.recurPattern = pendingEditChanges.recurPattern;
       task.assignedTo = pendingEditChanges.assignedTo;
       task.dueDate = pendingEditChanges.dueDate;
       task.endDate = pendingEditChanges.endDate;
       task.duration = pendingEditChanges.duration;
+      if ('maxOccurrences' in pendingEditChanges) task.maxOccurrences = pendingEditChanges.maxOccurrences;
 
       closeEditRecurringModal();
       saveData();
@@ -2715,12 +2781,13 @@
         if (isInSameSeries) {
           t.title = pendingEditChanges.title;
           t.category = pendingEditChanges.category;
-          t.size = pendingEditChanges.size;
+          if ('size' in pendingEditChanges) t.size = pendingEditChanges.size;
           t.recurPattern = pendingEditChanges.recurPattern;
           t.assignedTo = pendingEditChanges.assignedTo;
           t.dueDate = pendingEditChanges.dueDate;
           t.endDate = pendingEditChanges.endDate;
           t.duration = pendingEditChanges.duration;
+          if ('maxOccurrences' in pendingEditChanges) t.maxOccurrences = pendingEditChanges.maxOccurrences;
         }
       });
 
@@ -2752,12 +2819,13 @@
         if (isInSameSeries) {
           t.title = pendingEditChanges.title;
           t.category = pendingEditChanges.category;
-          t.size = pendingEditChanges.size;
+          if ('size' in pendingEditChanges) t.size = pendingEditChanges.size;
           t.recurPattern = pendingEditChanges.recurPattern;
           t.assignedTo = pendingEditChanges.assignedTo;
           t.dueDate = pendingEditChanges.dueDate;
           t.endDate = pendingEditChanges.endDate;
           t.duration = pendingEditChanges.duration;
+          if ('maxOccurrences' in pendingEditChanges) t.maxOccurrences = pendingEditChanges.maxOccurrences;
         }
       });
 
