@@ -52,7 +52,7 @@
       --person-cindy: #e11d48;
       --person-ivy: #9333ea;
       --person-angus: #059669;
-      --person-multiple: #6b7280;
+      --person-multiple: #a0522d;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -1963,6 +1963,28 @@
       return new Date(isoStr);
     }
 
+    // Helper function to get the color for a task based on its assignees
+    function getTaskColor(assignees) {
+      // Ensure assignees is an array
+      const assigneeArray = Array.isArray(assignees) ? assignees : [assignees];
+
+      // Map user IDs to their colors
+      const colorMap = {
+        'ian': '#2563eb',      // blue
+        'cindy': '#e11d48',    // red
+        'ivy': '#9333ea',      // purple
+        'angus': '#059669'     // green
+      };
+
+      // If only one assignee, use their color
+      if (assigneeArray.length === 1) {
+        return colorMap[assigneeArray[0]] || colorMap['ian'];
+      }
+
+      // If multiple assignees, use rust color for shared items
+      return '#a0522d';
+    }
+
     function showTaskError(message) {
       const errorDiv = document.getElementById('task-error');
       errorDiv.textContent = message;
@@ -3380,8 +3402,9 @@
               const timeDisplay = timeStr ? `<div class="calendar-task-time">${timeStr}${durationStr}</div>` : '';
               const assignees = Array.isArray(t.assignedTo) ? t.assignedTo : [t.assignedTo];
               const firstAssignee = assignees[0] || 'ian';
+              const taskColor = getTaskColor(t.assignedTo);
 
-              return `<div class="calendar-task" style="cursor: pointer;" onclick="navigateToPersonItems('${firstAssignee}')"><span class="calendar-task-title">${escapeHtml(t.title)}</span>${timeDisplay}<div class="calendar-task-cat">${categories[t.category]}</div></div>`;
+              return `<div class="calendar-task" style="cursor: pointer; border-left: 4px solid ${taskColor};" onclick="navigateToPersonItems('${firstAssignee}')"><span class="calendar-task-title">${escapeHtml(t.title)}</span>${timeDisplay}<div class="calendar-task-cat">${categories[t.category]}</div></div>`;
             }).join('')}
           </div>
         </div>`;
@@ -3479,14 +3502,14 @@
         return `${year}-${month}-${day}`;
       };
 
-      // Helper to get assignee color
+      // Helper to get assignee color - uses direct hex values for inline styles
       const getAssigneeColor = (assignedTo) => {
         const assignees = Array.isArray(assignedTo) ? assignedTo : [assignedTo];
         if (assignees.length > 1) {
-          return 'var(--person-multiple)';
+          return '#a0522d'; // rust color for shared items
         }
-        const personColorMap = { 'ian': 'var(--person-ian)', 'cindy': 'var(--person-cindy)', 'ivy': 'var(--person-ivy)', 'angus': 'var(--person-angus)' };
-        return personColorMap[assignees[0]] || 'var(--person-multiple)';
+        const personColorMap = { 'ian': '#2563eb', 'cindy': '#e11d48', 'ivy': '#9333ea', 'angus': '#059669' };
+        return personColorMap[assignees[0]] || '#a0522d';
       };
 
       // Hide past events (both single and recurring)
@@ -3599,14 +3622,14 @@
 
       let html = '';
 
-      // Helper to get assignee color
+      // Helper to get assignee color - uses direct hex values for inline styles
       const getAssigneeColor = (assignedTo) => {
         const assignees = Array.isArray(assignedTo) ? assignedTo : [assignedTo];
         if (assignees.length > 1) {
-          return 'var(--person-multiple)';
+          return '#a0522d'; // rust color for shared items
         }
-        const personColorMap = { 'ian': 'var(--person-ian)', 'cindy': 'var(--person-cindy)', 'ivy': 'var(--person-ivy)', 'angus': 'var(--person-angus)' };
-        return personColorMap[assignees[0]] || 'var(--person-multiple)';
+        const personColorMap = { 'ian': '#2563eb', 'cindy': '#e11d48', 'ivy': '#9333ea', 'angus': '#059669' };
+        return personColorMap[assignees[0]] || '#a0522d';
       };
 
       Object.entries(users).forEach(([userId, userData]) => {
