@@ -1332,7 +1332,7 @@
             </div>
 
             <div class="filter-bar" id="calendar-filter-bar" style="display: flex; gap: 16px; flex-wrap: wrap;">
-              <div class="filter-group" id="calendar-person-filter">
+              <div class="filter-group" id="calendar-person-filter" style="display: none;">
                 <div class="filter-label" style="font-size: 12px;">Person</div>
                 <div class="filter-buttons">
                   <button class="filter-btn active" data-filter="person" data-value="all" onclick="updateCalendarFilter('person', 'all', this)" style="font-size: 12px;">All</button>
@@ -1471,11 +1471,14 @@
               </div>
               <div class="category-filters" id="my-tasks-category-filters" style="display: none;"></div>
             </div>
-            <div class="filter-group">
-              <div class="filter-label" style="font-size: 12px;">Archive</div>
-              <div class="filter-buttons">
-                <button class="filter-btn active" onclick="toggleMyTasksArchiveFilter(false, this)" style="font-size: 12px;">Show Active</button>
-                <button class="filter-btn" onclick="toggleMyTasksArchiveFilter(true, this)" style="font-size: 12px;">Show Archived</button>
+            <div class="filter-group" id="my-tasks-archive-filter" style="flex-basis: 100%;">
+              <div class="filter-label" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; font-size: 12px;" onclick="toggleMyTasksArchiveFilter()">
+                <span>Archive</span>
+                <span id="my-tasks-archive-toggle" style="font-size: 12px; color: var(--text-tertiary);">▶</span>
+              </div>
+              <div class="filter-buttons" id="my-tasks-archive-buttons" style="display: none;">
+                <button class="filter-btn active" onclick="updateMyTasksArchiveFilter(false, this)" style="font-size: 12px;">Show Active</button>
+                <button class="filter-btn" onclick="updateMyTasksArchiveFilter(true, this)" style="font-size: 12px;">Show Archived</button>
               </div>
             </div>
           </div>
@@ -1528,11 +1531,14 @@
               </div>
               <div class="category-filters" id="all-tasks-category-filters" style="display: none;"></div>
             </div>
-            <div class="filter-group">
-              <div class="filter-label" style="font-size: 12px;">Archive</div>
-              <div class="filter-buttons">
-                <button class="filter-btn active" onclick="toggleAllTasksArchiveFilter(false, this)" style="font-size: 12px;">Show Active</button>
-                <button class="filter-btn" onclick="toggleAllTasksArchiveFilter(true, this)" style="font-size: 12px;">Show Archived</button>
+            <div class="filter-group" id="all-tasks-archive-filter" style="flex-basis: 100%;">
+              <div class="filter-label" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; font-size: 12px;" onclick="toggleAllTasksArchiveFilter()">
+                <span>Archive</span>
+                <span id="all-tasks-archive-toggle" style="font-size: 12px; color: var(--text-tertiary);">▶</span>
+              </div>
+              <div class="filter-buttons" id="all-tasks-archive-buttons" style="display: none;">
+                <button class="filter-btn active" onclick="updateAllTasksArchiveFilter(false, this)" style="font-size: 12px;">Show Active</button>
+                <button class="filter-btn" onclick="updateAllTasksArchiveFilter(true, this)" style="font-size: 12px;">Show Archived</button>
               </div>
             </div>
           </div>
@@ -3298,14 +3304,38 @@
       renderAllTasks();
     }
 
-    function toggleMyTasksArchiveFilter(showArchived, btn) {
+    function toggleMyTasksArchiveFilter() {
+      const filterDiv = document.getElementById('my-tasks-archive-buttons');
+      const toggleIcon = document.getElementById('my-tasks-archive-toggle');
+      if (filterDiv.style.display === 'none') {
+        filterDiv.style.display = 'flex';
+        toggleIcon.textContent = '▼';
+      } else {
+        filterDiv.style.display = 'none';
+        toggleIcon.textContent = '▶';
+      }
+    }
+
+    function updateMyTasksArchiveFilter(showArchived, btn) {
       myTasksFilters.showArchived = showArchived;
       btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       renderMyTasks();
     }
 
-    function toggleAllTasksArchiveFilter(showArchived, btn) {
+    function toggleAllTasksArchiveFilter() {
+      const filterDiv = document.getElementById('all-tasks-archive-buttons');
+      const toggleIcon = document.getElementById('all-tasks-archive-toggle');
+      if (filterDiv.style.display === 'none') {
+        filterDiv.style.display = 'flex';
+        toggleIcon.textContent = '▼';
+      } else {
+        filterDiv.style.display = 'none';
+        toggleIcon.textContent = '▶';
+      }
+    }
+
+    function updateAllTasksArchiveFilter(showArchived, btn) {
       allTasksFilters.showArchived = showArchived;
       btn.parentElement.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
@@ -4218,6 +4248,13 @@
     function renderAll() {
       //console.log('[renderAll] Starting with', tasks.length, 'tasks');
       renderCalendar();
+
+      // Show calendar person filter only for admins
+      const personFilter = document.getElementById('calendar-person-filter');
+      if (personFilter) {
+        personFilter.style.display = isAdmin() ? 'flex' : 'none';
+      }
+
       renderMyTasks();
       renderAllTasks();
       renderLeaderboard();
@@ -4304,6 +4341,14 @@
         }
 
         document.getElementById(section).classList.add('active');
+
+        // Show calendar person filter only for admins
+        if (section === 'calendar') {
+          const personFilter = document.getElementById('calendar-person-filter');
+          if (personFilter) {
+            personFilter.style.display = isAdmin() ? 'flex' : 'none';
+          }
+        }
       });
     });
 
