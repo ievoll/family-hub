@@ -1332,37 +1332,27 @@
               <button onclick="nextMonth()">Next &rarr;</button>
             </div>
 
-            <div class="filter-bar" id="calendar-filter-bar">
+            <div class="filter-bar" id="calendar-filter-bar" style="display: flex; gap: 16px; flex-wrap: wrap;">
               <div class="filter-group" id="calendar-person-filter">
-                <div class="filter-label">Person</div>
+                <div class="filter-label" style="font-size: 12px;">Person</div>
                 <div class="filter-buttons">
-                  <button class="filter-btn active" data-filter="person" data-value="all" onclick="updateCalendarFilter('person', 'all', this)">All</button>
-                  <button class="filter-btn" data-filter="person" data-value="ian" onclick="updateCalendarFilter('person', 'ian', this)">Ian</button>
-                  <button class="filter-btn" data-filter="person" data-value="cindy" onclick="updateCalendarFilter('person', 'cindy', this)">Cindy</button>
-                  <button class="filter-btn" data-filter="person" data-value="ivy" onclick="updateCalendarFilter('person', 'ivy', this)">Ivy</button>
-                  <button class="filter-btn" data-filter="person" data-value="angus" onclick="updateCalendarFilter('person', 'angus', this)">Angus</button>
+                  <button class="filter-btn active" data-filter="person" data-value="all" onclick="updateCalendarFilter('person', 'all', this)" style="font-size: 12px;">All</button>
+                  <button class="filter-btn" data-filter="person" data-value="ian" onclick="updateCalendarFilter('person', 'ian', this)" style="font-size: 12px;">Ian</button>
+                  <button class="filter-btn" data-filter="person" data-value="cindy" onclick="updateCalendarFilter('person', 'cindy', this)" style="font-size: 12px;">Cindy</button>
+                  <button class="filter-btn" data-filter="person" data-value="ivy" onclick="updateCalendarFilter('person', 'ivy', this)" style="font-size: 12px;">Ivy</button>
+                  <button class="filter-btn" data-filter="person" data-value="angus" onclick="updateCalendarFilter('person', 'angus', this)" style="font-size: 12px;">Angus</button>
                 </div>
               </div>
-              <div style="display: flex; gap: 16px;">
-                <div class="filter-group">
-                  <div class="filter-label">Type</div>
-                  <div class="filter-buttons">
-                    <button class="filter-btn active" data-filter="type" data-value="all" onclick="updateCalendarFilter('type', 'all', this)">All</button>
-                    <button class="filter-btn" data-filter="type" data-value="task" onclick="updateCalendarFilter('type', 'task', this)">Tasks</button>
-                    <button class="filter-btn" data-filter="type" data-value="event" onclick="updateCalendarFilter('type', 'event', this)">Events</button>
-                  </div>
-                </div>
-                <div class="filter-group" id="calendar-task-status-filter">
-                  <div class="filter-label">Task Status</div>
-                  <div class="filter-buttons">
-                    <button class="filter-btn active" data-filter="status" data-value="all" onclick="updateCalendarFilter('status', 'all', this)">All</button>
-                    <button class="filter-btn" data-filter="status" data-value="pending" onclick="updateCalendarFilter('status', 'pending', this)">Pending</button>
-                    <button class="filter-btn" data-filter="status" data-value="completed" onclick="updateCalendarFilter('status', 'completed', this)">Completed</button>
-                  </div>
+              <div class="filter-group">
+                <div class="filter-label" style="font-size: 12px;">Type</div>
+                <div class="filter-buttons">
+                  <button class="filter-btn active" data-filter="type" data-value="all" onclick="updateCalendarFilter('type', 'all', this)" style="font-size: 12px;">All</button>
+                  <button class="filter-btn" data-filter="type" data-value="task" onclick="updateCalendarFilter('type', 'task', this)" style="font-size: 12px;">Tasks</button>
+                  <button class="filter-btn" data-filter="type" data-value="event" onclick="updateCalendarFilter('type', 'event', this)" style="font-size: 12px;">Events</button>
                 </div>
               </div>
-              <div class="filter-group" id="calendar-categories-filter">
-                <div class="filter-label" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none;" onclick="toggleCategoryFilter()">
+              <div class="filter-group" id="calendar-categories-filter" style="flex-basis: 100%;">
+                <div class="filter-label" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; font-size: 12px;" onclick="toggleCategoryFilter()">
                   <span>Categories</span>
                   <span id="calendar-category-toggle" style="font-size: 12px; color: var(--text-tertiary);">▶</span>
                 </div>
@@ -1468,31 +1458,26 @@
           <div class="filter-bar">
             <div style="display: flex; gap: 16px;">
               <div class="filter-group">
-                <div class="filter-label">Type</div>
+                <div class="filter-label" style="font-size: 12px;">Type</div>
                 <div class="filter-buttons">
-                  <button class="filter-btn active" data-filter="type" data-value="all" onclick="updateMyTasksFilter('type', 'all', this)">All</button>
-                  <button class="filter-btn" data-filter="type" data-value="task" onclick="updateMyTasksFilter('type', 'task', this)">Tasks</button>
-                  <button class="filter-btn" data-filter="type" data-value="event" onclick="updateMyTasksFilter('type', 'event', this)">Events</button>
-                </div>
-              </div>
-              <div class="filter-group" id="my-tasks-task-status-filter">
-                <div class="filter-label">Task Status</div>
-                <div class="filter-buttons">
-                  <button class="filter-btn active" data-filter="status" data-value="all" onclick="updateMyTasksFilter('status', 'all', this)">All</button>
-                  <button class="filter-btn" data-filter="status" data-value="pending" onclick="updateMyTasksFilter('status', 'pending', this)">Pending</button>
-                  <button class="filter-btn" data-filter="status" data-value="completed" onclick="updateMyTasksFilter('status', 'completed', this)">Completed</button>
+                  <button class="filter-btn active" data-filter="type" data-value="all" onclick="updateMyTasksFilter('type', 'all', this)" style="font-size: 12px;">All</button>
+                  <button class="filter-btn" data-filter="type" data-value="task" onclick="updateMyTasksFilter('type', 'task', this)" style="font-size: 12px;">Tasks</button>
+                  <button class="filter-btn" data-filter="type" data-value="event" onclick="updateMyTasksFilter('type', 'event', this)" style="font-size: 12px;">Events</button>
                 </div>
               </div>
             </div>
-            <div class="filter-group">
-              <div class="filter-label">Categories</div>
-              <div class="category-filters" id="my-tasks-category-filters"></div>
+            <div class="filter-group" id="my-tasks-categories-filter" style="flex-basis: 100%;">
+              <div class="filter-label" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; font-size: 12px;" onclick="toggleMyTasksCategoryFilter()">
+                <span>Categories</span>
+                <span id="my-tasks-category-toggle" style="font-size: 12px; color: var(--text-tertiary);">▶</span>
+              </div>
+              <div class="category-filters" id="my-tasks-category-filters" style="display: none;"></div>
             </div>
             <div class="filter-group">
-              <div class="filter-label">Archive</div>
+              <div class="filter-label" style="font-size: 12px;">Archive</div>
               <div class="filter-buttons">
-                <button class="filter-btn active" onclick="toggleMyTasksArchiveFilter(false, this)">Show Active</button>
-                <button class="filter-btn" onclick="toggleMyTasksArchiveFilter(true, this)">Show Archived</button>
+                <button class="filter-btn active" onclick="toggleMyTasksArchiveFilter(false, this)" style="font-size: 12px;">Show Active</button>
+                <button class="filter-btn" onclick="toggleMyTasksArchiveFilter(true, this)" style="font-size: 12px;">Show Archived</button>
               </div>
             </div>
           </div>
@@ -1510,41 +1495,47 @@
           <div class="filter-bar">
             <div style="display: flex; gap: 16px;">
               <div class="filter-group">
-                <div class="filter-label">Type</div>
+                <div class="filter-label" style="font-size: 12px;">Person</div>
                 <div class="filter-buttons">
-                  <button class="filter-btn active" data-filter="type" data-value="all" onclick="updateAllTasksFilter('type', 'all', this)">All</button>
-                  <button class="filter-btn" data-filter="type" data-value="task" onclick="updateAllTasksFilter('type', 'task', this)">Tasks</button>
-                  <button class="filter-btn" data-filter="type" data-value="event" onclick="updateAllTasksFilter('type', 'event', this)">Events</button>
+                  <button class="filter-btn active" data-filter="person" data-value="all" onclick="updateAllTasksPersonFilter('all', this)" style="font-size: 12px;">All</button>
+                  <button class="filter-btn" data-filter="person" data-value="ian" onclick="updateAllTasksPersonFilter('ian', this)" style="font-size: 12px;">Ian</button>
+                  <button class="filter-btn" data-filter="person" data-value="cindy" onclick="updateAllTasksPersonFilter('cindy', this)" style="font-size: 12px;">Cindy</button>
+                  <button class="filter-btn" data-filter="person" data-value="ivy" onclick="updateAllTasksPersonFilter('ivy', this)" style="font-size: 12px;">Ivy</button>
+                  <button class="filter-btn" data-filter="person" data-value="angus" onclick="updateAllTasksPersonFilter('angus', this)" style="font-size: 12px;">Angus</button>
                 </div>
               </div>
-              <div class="filter-group" id="all-tasks-task-status-filter">
-                <div class="filter-label">Task Status</div>
+              <div class="filter-group">
+                <div class="filter-label" style="font-size: 12px;">Type</div>
                 <div class="filter-buttons">
-                  <button class="filter-btn active" data-filter="status" data-value="all" onclick="updateAllTasksFilter('status', 'all', this)">All</button>
-                  <button class="filter-btn" data-filter="status" data-value="pending" onclick="updateAllTasksFilter('status', 'pending', this)">Pending</button>
-                  <button class="filter-btn" data-filter="status" data-value="completed" onclick="updateAllTasksFilter('status', 'completed', this)">Completed</button>
+                  <button class="filter-btn active" data-filter="type" data-value="all" onclick="updateAllTasksFilter('type', 'all', this)" style="font-size: 12px;">All</button>
+                  <button class="filter-btn" data-filter="type" data-value="task" onclick="updateAllTasksFilter('type', 'task', this)" style="font-size: 12px;">Tasks</button>
+                  <button class="filter-btn" data-filter="type" data-value="event" onclick="updateAllTasksFilter('type', 'event', this)" style="font-size: 12px;">Events</button>
                 </div>
               </div>
             </div>
-            <div class="filter-group">
-              <div class="filter-label">Person</div>
-              <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="person" data-value="all" onclick="updateAllTasksPersonFilter('all', this)">All</button>
-                <button class="filter-btn" data-filter="person" data-value="ian" onclick="updateAllTasksPersonFilter('ian', this)">Ian</button>
-                <button class="filter-btn" data-filter="person" data-value="cindy" onclick="updateAllTasksPersonFilter('cindy', this)">Cindy</button>
-                <button class="filter-btn" data-filter="person" data-value="ivy" onclick="updateAllTasksPersonFilter('ivy', this)">Ivy</button>
-                <button class="filter-btn" data-filter="person" data-value="angus" onclick="updateAllTasksPersonFilter('angus', this)">Angus</button>
+            <div class="filter-group" id="all-tasks-status-filter" style="flex-basis: 100%;">
+              <div class="filter-label" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; font-size: 12px;" onclick="toggleAllTasksStatusFilter()">
+                <span>Task Status</span>
+                <span id="all-tasks-status-toggle" style="font-size: 12px; color: var(--text-tertiary);">▶</span>
+              </div>
+              <div class="filter-buttons" id="all-tasks-status-buttons" style="display: none;">
+                <button class="filter-btn active" data-filter="status" data-value="all" onclick="updateAllTasksFilter('status', 'all', this)" style="font-size: 12px;">All</button>
+                <button class="filter-btn" data-filter="status" data-value="pending" onclick="updateAllTasksFilter('status', 'pending', this)" style="font-size: 12px;">Pending</button>
+                <button class="filter-btn" data-filter="status" data-value="completed" onclick="updateAllTasksFilter('status', 'completed', this)" style="font-size: 12px;">Completed</button>
               </div>
             </div>
-            <div class="filter-group">
-              <div class="filter-label">Categories</div>
-              <div class="category-filters" id="all-tasks-category-filters"></div>
+            <div class="filter-group" id="all-tasks-categories-filter" style="flex-basis: 100%;">
+              <div class="filter-label" style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; font-size: 12px;" onclick="toggleAllTasksCategoryFilter()">
+                <span>Categories</span>
+                <span id="all-tasks-category-toggle" style="font-size: 12px; color: var(--text-tertiary);">▶</span>
+              </div>
+              <div class="category-filters" id="all-tasks-category-filters" style="display: none;"></div>
             </div>
             <div class="filter-group">
-              <div class="filter-label">Archive</div>
+              <div class="filter-label" style="font-size: 12px;">Archive</div>
               <div class="filter-buttons">
-                <button class="filter-btn active" onclick="toggleAllTasksArchiveFilter(false, this)">Show Active</button>
-                <button class="filter-btn" onclick="toggleAllTasksArchiveFilter(true, this)">Show Archived</button>
+                <button class="filter-btn active" onclick="toggleAllTasksArchiveFilter(false, this)" style="font-size: 12px;">Show Active</button>
+                <button class="filter-btn" onclick="toggleAllTasksArchiveFilter(true, this)" style="font-size: 12px;">Show Archived</button>
               </div>
             </div>
           </div>
@@ -1924,9 +1915,9 @@
     });
 
     // Filter state
-    let calendarFilters = { person: 'all', status: 'all', type: 'all', categories: new Set(Object.keys(categories)) };
-    let myTasksFilters = { status: 'all', type: 'all', categories: new Set(Object.keys(categories)), showArchived: false };
-    let allTasksFilters = { person: 'all', status: 'all', type: 'all', categories: new Set(Object.keys(categories)), showArchived: false };
+    let calendarFilters = { person: 'all', type: 'all', categories: new Set(Object.keys(categories)) };
+    let myTasksFilters = { type: 'all', categories: new Set(Object.keys(categories)), showArchived: false };
+    let allTasksFilters = { person: 'all', type: 'all', status: 'all', categories: new Set(Object.keys(categories)), showArchived: false };
     let shopViewUser = 'ian'; // Track which user's shop is being viewed (for admin view)
     let calendarShowAll = false;
 
@@ -2763,6 +2754,10 @@
 
       const currentOccurrence = task.occurrenceNumber || 1;
 
+      // Extract time from the new dueDate if it has one
+      const newDueDateParts = pendingEditChanges.dueDate.split(' ');
+      const newTime = newDueDateParts.length > 1 ? ' ' + newDueDateParts[1] : '';
+
       // Apply changes to this task and all following occurrences
       tasks.forEach(t => {
         let isInSameSeries = false;
@@ -2784,7 +2779,16 @@
           if ('size' in pendingEditChanges) t.size = pendingEditChanges.size;
           t.recurPattern = pendingEditChanges.recurPattern;
           t.assignedTo = pendingEditChanges.assignedTo;
-          t.dueDate = pendingEditChanges.dueDate;
+
+          // For recurring tasks, preserve each occurrence's original date and apply new time
+          if (t.recurPattern && t.recurPattern !== 'once') {
+            const existingDateParts = t.dueDate ? t.dueDate.split(' ') : [];
+            const existingDate = existingDateParts[0];
+            t.dueDate = existingDate + newTime;
+          } else {
+            t.dueDate = pendingEditChanges.dueDate;
+          }
+
           t.endDate = pendingEditChanges.endDate;
           t.duration = pendingEditChanges.duration;
           if ('maxOccurrences' in pendingEditChanges) t.maxOccurrences = pendingEditChanges.maxOccurrences;
@@ -2801,6 +2805,10 @@
       if (!editingTaskId || !pendingEditChanges) return;
       const task = tasks.find(t => t.id === editingTaskId);
       if (!task) return;
+
+      // Extract time from the new dueDate if it has one
+      const newDueDateParts = pendingEditChanges.dueDate.split(' ');
+      const newTime = newDueDateParts.length > 1 ? ' ' + newDueDateParts[1] : '';
 
       // Apply changes to all tasks in the same series
       tasks.forEach(t => {
@@ -2822,7 +2830,16 @@
           if ('size' in pendingEditChanges) t.size = pendingEditChanges.size;
           t.recurPattern = pendingEditChanges.recurPattern;
           t.assignedTo = pendingEditChanges.assignedTo;
-          t.dueDate = pendingEditChanges.dueDate;
+
+          // For recurring tasks, preserve each occurrence's original date and apply new time
+          if (t.recurPattern && t.recurPattern !== 'once') {
+            const existingDateParts = t.dueDate ? t.dueDate.split(' ') : [];
+            const existingDate = existingDateParts[0];
+            t.dueDate = existingDate + newTime;
+          } else {
+            t.dueDate = pendingEditChanges.dueDate;
+          }
+
           t.endDate = pendingEditChanges.endDate;
           t.duration = pendingEditChanges.duration;
           if ('maxOccurrences' in pendingEditChanges) t.maxOccurrences = pendingEditChanges.maxOccurrences;
@@ -3154,10 +3171,6 @@
         calendarFilters.person = value;
         btn.parentElement.querySelectorAll('[data-filter="person"]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-      } else if (filterType === 'status') {
-        calendarFilters.status = value;
-        btn.parentElement.querySelectorAll('[data-filter="status"]').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
       } else if (filterType === 'type') {
         calendarFilters.type = value;
         btn.parentElement.querySelectorAll('[data-filter="type"]').forEach(b => b.classList.remove('active'));
@@ -3175,6 +3188,42 @@
     function toggleCategoryFilter() {
       const filterDiv = document.getElementById('calendar-category-filters');
       const toggleIcon = document.getElementById('calendar-category-toggle');
+      if (filterDiv.style.display === 'none') {
+        filterDiv.style.display = 'block';
+        toggleIcon.textContent = '▼';
+      } else {
+        filterDiv.style.display = 'none';
+        toggleIcon.textContent = '▶';
+      }
+    }
+
+    function toggleMyTasksCategoryFilter() {
+      const filterDiv = document.getElementById('my-tasks-category-filters');
+      const toggleIcon = document.getElementById('my-tasks-category-toggle');
+      if (filterDiv.style.display === 'none') {
+        filterDiv.style.display = 'block';
+        toggleIcon.textContent = '▼';
+      } else {
+        filterDiv.style.display = 'none';
+        toggleIcon.textContent = '▶';
+      }
+    }
+
+    function toggleAllTasksStatusFilter() {
+      const filterDiv = document.getElementById('all-tasks-status-buttons');
+      const toggleIcon = document.getElementById('all-tasks-status-toggle');
+      if (filterDiv.style.display === 'none') {
+        filterDiv.style.display = 'flex';
+        toggleIcon.textContent = '▼';
+      } else {
+        filterDiv.style.display = 'none';
+        toggleIcon.textContent = '▶';
+      }
+    }
+
+    function toggleAllTasksCategoryFilter() {
+      const filterDiv = document.getElementById('all-tasks-category-filters');
+      const toggleIcon = document.getElementById('all-tasks-category-toggle');
       if (filterDiv.style.display === 'none') {
         filterDiv.style.display = 'block';
         toggleIcon.textContent = '▼';
@@ -3212,11 +3261,7 @@
     }
 
     function updateMyTasksFilter(filterType, value, btn) {
-      if (filterType === 'status') {
-        myTasksFilters.status = value;
-        btn.parentElement.querySelectorAll('[data-filter="status"]').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      } else if (filterType === 'type') {
+      if (filterType === 'type') {
         myTasksFilters.type = value;
         btn.parentElement.querySelectorAll('[data-filter="type"]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
@@ -3238,13 +3283,13 @@
     }
 
     function updateAllTasksFilter(filterType, value, btn) {
-      if (filterType === 'status') {
-        allTasksFilters.status = value;
-        btn.parentElement.querySelectorAll('[data-filter="status"]').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      } else if (filterType === 'type') {
+      if (filterType === 'type') {
         allTasksFilters.type = value;
         btn.parentElement.querySelectorAll('[data-filter="type"]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      } else if (filterType === 'status') {
+        allTasksFilters.status = value;
+        btn.parentElement.querySelectorAll('[data-filter="status"]').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
       } else if (filterType === 'category') {
         if (allTasksFilters.categories.has(value)) {
@@ -3414,13 +3459,6 @@
           dayTasks = dayTasks.filter(t => t.type === calendarFilters.type);
         }
 
-        // Apply status filter only to tasks (events always show)
-        if (calendarFilters.status === 'pending') {
-          dayTasks = dayTasks.filter(t => t.type === 'event' || !t.completed);
-        } else if (calendarFilters.status === 'completed') {
-          dayTasks = dayTasks.filter(t => t.type === 'event' || t.completed);
-        }
-
         // Apply category filter
         dayTasks = dayTasks.filter(t => calendarFilters.categories.has(t.category));
 
@@ -3476,13 +3514,6 @@
       // Apply type filter first
       if (myTasksFilters.type !== 'all') {
         myTasks = myTasks.filter(t => t.type === myTasksFilters.type);
-      }
-
-      // Apply status filter only to tasks (events always show)
-      if (myTasksFilters.status === 'pending') {
-        myTasks = myTasks.filter(t => t.type === 'event' || !t.completed);
-      } else if (myTasksFilters.status === 'completed') {
-        myTasks = myTasks.filter(t => t.type === 'event' || t.completed);
       }
 
       // Apply category filter
