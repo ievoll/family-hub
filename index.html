@@ -2187,7 +2187,6 @@
       const isAdmin = users[currentUser].role === 'admin';
 
       document.getElementById('my-tasks-header').textContent = isAdmin ? 'Items' : `${userName}'s Items`;
-      document.getElementById('my-tasks-person-label').textContent = isAdmin ? 'View and manage tasks and events' : `${userName}'s tasks and events`;
 
       // For admins, just show "Shop". For members, show their name's Shop. Special title for Ivy.
       const shopTitle = isAdmin ? 'Shop' : (currentUser === 'ivy' ? 'Ivy Flower Head Shop' : `${userName}'s Shop`);
@@ -2197,7 +2196,7 @@
       document.getElementById('calendar-header').textContent = isAdmin ? 'Calendar' : `${userName}'s Calendar`;
 
       // Hide filters for non-admins (Ivy and Angus can only see their own tasks)
-      document.getElementById('calendar-person-filter').style.display = isAdmin ? 'block' : 'none';
+      document.getElementById('calendar-person-filter').style.display = isAdmin ? 'flex' : 'none';
       document.getElementById('calendar-categories-filter').style.display = isAdmin ? 'block' : 'none';
 
       // Show clear data button only for Ian
@@ -3192,7 +3191,7 @@
       const filterDiv = document.getElementById('calendar-category-filters');
       const toggleIcon = document.getElementById('calendar-category-toggle');
       if (filterDiv.style.display === 'none') {
-        filterDiv.style.display = 'block';
+        filterDiv.style.display = 'flex';
         toggleIcon.textContent = '▼';
       } else {
         filterDiv.style.display = 'none';
@@ -3204,7 +3203,7 @@
       const filterDiv = document.getElementById('my-tasks-category-filters');
       const toggleIcon = document.getElementById('my-tasks-category-toggle');
       if (filterDiv.style.display === 'none') {
-        filterDiv.style.display = 'block';
+        filterDiv.style.display = 'flex';
         toggleIcon.textContent = '▼';
       } else {
         filterDiv.style.display = 'none';
@@ -3228,7 +3227,7 @@
       const filterDiv = document.getElementById('all-tasks-category-filters');
       const toggleIcon = document.getElementById('all-tasks-category-toggle');
       if (filterDiv.style.display === 'none') {
-        filterDiv.style.display = 'block';
+        filterDiv.style.display = 'flex';
         toggleIcon.textContent = '▼';
       } else {
         filterDiv.style.display = 'none';
