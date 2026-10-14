@@ -2387,6 +2387,10 @@
       errorDiv.style.display = 'none';
     }
 
+    function isNameTaken(name) {
+      return tasks.some(t => t.title.toLowerCase() === name.toLowerCase());
+    }
+
     function addTask() {
       try {
       const title = document.getElementById('task-title').value.trim();
@@ -2421,6 +2425,10 @@
       // Validation
       if (!title) {
         showTaskError('Please enter a task title');
+        return;
+      }
+      if (isNameTaken(title)) {
+        showTaskError('Name taken, choose a new one');
         return;
       }
       if (assignedTo.length === 0) {
@@ -2515,6 +2523,11 @@
       const completed = document.getElementById('admin-task-completed').checked;
 
       if (!title || !assignedTo || !category || !size || !dueDate) return;
+
+      if (isNameTaken(title)) {
+        showTaskError('Name taken, choose a new one');
+        return;
+      }
 
       const newAdminTask = {
         id: Date.now(),
