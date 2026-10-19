@@ -490,6 +490,16 @@
       opacity: 0.4;
     }
 
+    .calendar-day.today {
+      border: 2px solid var(--accent);
+      background: var(--accent-light);
+    }
+
+    .calendar-day.today .calendar-day-number {
+      font-weight: 700;
+      color: var(--accent);
+    }
+
     .calendar-day-number {
       font-weight: 600;
       font-size: 12px;
@@ -3409,12 +3419,19 @@
                             String(lastDay.getDate()).padStart(2, '0');
 
       let current = new Date(startDate);
+      // Get today's date in YYYY-MM-DD format
+      const today = new Date();
+      const todayStr = today.getFullYear() + '-' +
+                       String(today.getMonth() + 1).padStart(2, '0') + '-' +
+                       String(today.getDate()).padStart(2, '0');
+
       while (current <= lastDay || current.getDay() !== 0) {
         // Use local date components to avoid timezone issues
         const dateStr = current.getFullYear() + '-' +
                         String(current.getMonth() + 1).padStart(2, '0') + '-' +
                         String(current.getDate()).padStart(2, '0');
         const isOtherMonth = current.getMonth() !== month;
+        const isToday = dateStr === todayStr;
 
         let dayTasks = tasks.filter(t => {
           if (!canSeeTask(t)) return false;
@@ -3469,7 +3486,7 @@
           return 0; // Keep original order if no time to sort by
         });
 
-        html += `<div class="calendar-day ${isOtherMonth ? 'other-month' : ''}">
+        html += `<div class="calendar-day ${isOtherMonth ? 'other-month' : ''} ${isToday ? 'today' : ''}">
           <div class="calendar-day-number">${current.getDate()}</div>
           <div class="calendar-tasks">
             ${dayTasks.map(t => {
