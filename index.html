@@ -1556,9 +1556,6 @@
 
           <div class="leaderboard" id="leaderboard-content"></div>
 
-          <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border); display: none;" id="clear-data-section">
-            <button style="background: var(--red); color: white; padding: 8px 14px; font-size: 13px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;" onclick="showClearDataConfirm()">🗑️ Delete All Data</button>
-          </div>
         </section>
 
         <!-- Shop -->
@@ -1772,17 +1769,6 @@
   </div>
 
   <!-- Clear Data Confirmation Modal -->
-  <div class="modal" id="clear-data-modal">
-    <div class="modal-content" style="max-width: 400px;">
-      <div class="modal-header">Clear All Data?</div>
-      <p style="color: var(--text-secondary); margin-bottom: 16px;">This will permanently delete all tasks, Wuzzabucks, and purchase history. This cannot be undone.</p>
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick="closeClearDataModal()">No, Cancel</button>
-        <button style="background: var(--red); color: white;" onclick="confirmClearAllData()">Yes, Delete All Data</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Delete Task Confirmation Modal (single item) -->
   <div class="modal" id="delete-task-confirmation-modal">
     <div class="modal-content" style="max-width: 400px;">
@@ -2090,41 +2076,6 @@
       });
     }
 
-    function showClearDataConfirm() {
-      // Only Ian can delete all data
-      if (currentUser !== 'ian') {
-        showTaskError('Only Ian can delete all data');
-        return;
-      }
-      document.getElementById('clear-data-modal').classList.add('active');
-    }
-
-    function closeClearDataModal() {
-      document.getElementById('clear-data-modal').classList.remove('active');
-    }
-
-    function confirmClearAllData() {
-      tasks = [];
-      shopCart = {};
-      shopSpending = {};
-      earnedWBPerUser = {};
-      purchaseHistory = [];
-      claimedItems = [];
-      notes = {};
-      Object.keys(users).forEach(userId => {
-        shopSpending[userId] = 0;
-        earnedWBPerUser[userId] = 0;
-      });
-      database.ref('familyHub').remove().then(() => {
-        closeClearDataModal();
-        renderAll();
-        showTaskSuccess('✓ All data cleared!');
-      }).catch(error => {
-        console.error('Failed to clear data:', error);
-        showTaskError('Failed to clear data');
-      });
-    }
-
     function claimItem(purchaseIndex) {
       const userHistory = purchaseHistory.filter(p => p.userId === currentUser);
       if (purchaseIndex >= 0 && purchaseIndex < userHistory.length) {
@@ -2199,9 +2150,6 @@
       // Hide filters for non-admins (Ivy and Angus can only see their own tasks)
       document.getElementById('calendar-person-filter').style.display = isAdmin ? 'flex' : 'none';
       document.getElementById('calendar-categories-filter').style.display = isAdmin ? 'block' : 'none';
-
-      // Show clear data button only for Ian
-      document.getElementById('clear-data-section').style.display = (currentUser === 'ian') ? 'block' : 'none';
 
       // Show notepad nav item only for Ian and Cindy
       document.getElementById('notepad-nav-item').style.display = (currentUser === 'ian' || currentUser === 'cindy') ? 'block' : 'none';
@@ -4368,10 +4316,6 @@
     // Close modal on outside click
     document.getElementById('edit-modal').addEventListener('click', (e) => {
       if (e.target.id === 'edit-modal') closeEditModal();
-    });
-
-    document.getElementById('clear-data-modal').addEventListener('click', (e) => {
-      if (e.target.id === 'clear-data-modal') closeClearDataModal();
     });
 
     // Firebase Authentication functions
